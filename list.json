@@ -1,18 +1,18 @@
 {
-    "papers": [
-        { "id": 1, "name": "Sora", "year": 2024, "month": 2, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Large-scale diffusion transformer for high-fidelity video generation.", "link": "#" },
-        { "id": 2, "name": "AnimateAnyone", "year": 2023, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Reference-Net based high-fidelity human animation.", "link": "#" },
-        { "id": 3, "name": "MuseTalk", "year": 2024, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "UNet", "desc": "Real-time lip-sync with localized facial refinement.", "link": "#" },
-        { "id": 4, "name": "V-Express", "year": 2024, "month": 6, "mod": ["Audio", "Motion"], "task": "Talking Head", "base": "UNet", "desc": "A hybrid model balancing audio-sync and pose control.", "link": "#" },
-        { "id": 5, "name": "Champ", "year": 2024, "month": 3, "mod": ["Motion"], "task": "Animation", "base": "UNet", "desc": "3D skeleton-guided motion synthesis.", "link": "#" },
-        { "id": 16, "name": "V-Flow", "year": 2025, "month": 2, "mod": ["Text", "Motion", "Vision"], "task": "General", "base": "Flow Matching", "desc": "Next-gen multi-condition flow matching system.", "link": "#" },
-        { "id": 17, "name": "LivePortrait", "year": 2024, "month": 10, "mod": ["Vision"], "task": "Talking Head", "base": "GAN", "desc": "Stitch-capable portrait animation.", "link": "#" },
-        { "id": 18, "name": "EchoMimic", "year": 2024, "month": 7, "mod": ["Audio", "Motion"], "task": "Animation", "base": "UNet", "desc": "Synchronized facial and body motion from dual cues.", "link": "#" }
-    ],
-    "categories": {
-        "mod": ["Vision", "Text", "Audio", "Motion"],
-        "task": ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "General"],
-        "base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive"]
-    },
-    "years": [2023, 2024, 2025]
+"papers": [
+{ "id": 1, "name": "Sora", "year": 2024, "month": 2, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Large-scale diffusion transformer for high-fidelity video generation.", "link": "https://openai.com/sora" },
+{ "id": 2, "name": "AnimateAnyone", "year": 2023, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Reference-Net based high-fidelity human animation.", "link": "#" },
+{ "id": 3, "name": "MuseTalk", "year": 2024, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "UNet", "desc": "Real-time lip-sync with localized facial refinement.", "link": "#" },
+{ "id": 4, "name": "V-Express", "year": 2024, "month": 6, "mod": ["Audio", "Motion"], "task": "Talking Head", "base": "UNet", "desc": "A hybrid model balancing audio-sync and pose control.", "link": "#" },
+{ "id": 5, "name": "Champ", "year": 2024, "month": 3, "mod": ["Motion"], "task": "Animation", "base": "UNet", "desc": "3D skeleton-guided motion synthesis.", "link": "#" },
+{ "id": 16, "name": "V-Flow", "year": 2025, "month": 2, "mod": ["Text", "Motion", "Vision"], "task": "General", "base": "Flow Matching", "desc": "Next-gen multi-condition flow matching system.", "link": "#" },
+{ "id": 17, "name": "LivePortrait", "year": 2024, "month": 10, "mod": ["Vision"], "task": "Talking Head", "base": "GAN", "desc": "Stitch-capable portrait animation.", "link": "#" },
+{ "id": 18, "name": "EchoMimic", "year": 2024, "month": 7, "mod": ["Audio", "Motion"], "task": "Animation", "base": "UNet", "desc": "Synchronized facial and body motion from dual cues.", "link": "#" }
+],
+"categories": {
+"mod": ["Vision", "Text", "Audio", "Motion"],
+"task": ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "General"],
+"base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive"]
+},
+"years": [2023, 2024, 2025]
 }
