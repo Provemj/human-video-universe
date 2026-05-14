@@ -48,7 +48,7 @@
 
 <div id="loading">
     <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-    <span class="font-black tracking-widest uppercase text-indigo-400">Expanding Universe...</span>
+    <span class="font-black tracking-widest uppercase text-indigo-400">Organizing Universe...</span>
 </div>
 
 <div id="app" class="max-w-[1600px] mx-auto p-6 md:p-12 opacity-0 transition-opacity duration-1000">
@@ -78,76 +78,74 @@
 </div>
 
 <div id="detail-modal" class="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl hidden z-[100] flex items-center justify-center p-6">
-    <div class="bg-slate-900 border border-white/10 rounded-[3rem] max-w-3xl w-full p-12 relative shadow-2xl">
-        <button onclick="closeModal()" class="absolute top-10 right-10 text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-10 h-10"></i></button>
-        <div id="modal-content"></div>
-    </div>
+    <div class="bg-slate-900 border border-white/10 rounded-[3rem] max-w-3xl w-full p-12 relative shadow-2xl" id="modal-content"></div>
 </div>
 
 <script>
     let DATA = null;
     let currentGroup = 'mod';
-    let Y_MAP = {};
-    let BASE_YEAR = 2018; 
-    const NODE_GAP = 30;
-    const YEAR_HEIGHT = 450; 
+    let Y_MAP = {}; 
+    const MIN_MONTH_HEIGHT = 80; 
+    const NODE_GAP = 30; 
     const START_Y = 400;
-    
+
     async function init() {
         try {
-            // Fetch the external JSON file
             const response = await fetch('list.json');
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
+            if (!response.ok) throw new Error("Could not find list.json");
             DATA = await response.json();
-    
-            DATA.papers.sort((a, b) => (a.year + a.month/13) - (b.year + b.month/13));
-            
-            const validYears = DATA.papers.map(p => parseInt(p.year)).filter(y => !isNaN(y));
-            BASE_YEAR = Math.min(...validYears, 2025);
-            const maxYear = Math.max(...validYears, 2026);
-            const span = (maxYear - BASE_YEAR) + 1;
-            
-            const container = document.getElementById('main-container');
-            if (container) {
-                container.style.minHeight = `${START_Y + (span * YEAR_HEIGHT) + 400}px`;
-            }
-    
-            updateGroupBy('mod');
-            
-            const loading = document.getElementById('loading');
-            if (loading) {
-                loading.style.opacity = '0';
-                setTimeout(() => loading.classList.add('hidden'), 500);
-            }
-            const app = document.getElementById('app');
-            if (app) app.classList.remove('opacity-0');
-    
-            if (window.lucide) lucide.createIcons();
-            window.addEventListener('resize', () => renderTree());
-        } catch (error) {
-            console.error("Initialization Error:", error);
-            const loading = document.getElementById('loading');
-            if (loading) {
-                loading.innerHTML = `
-                    <div class="text-red-500 bg-red-500/10 p-10 rounded-[3rem] border border-red-500/20 text-center max-w-md mx-6">
-                        <p class="font-black text-2xl mb-4 uppercase">Data Load Failure</p>
-                        <p class="text-sm opacity-70 mb-8">${error.message}</p>
-                        <button onclick="location.reload()" class="w-full py-4 bg-red-500 text-white rounded-2xl font-bold">RETRY</button>
-                    </div>
-                `;
-            }
-        }
-    }
-    
-    window.addEventListener('DOMContentLoaded', init);
 
-    function getY(year, month, si = 0) {
-        const key = `${year}-${month}`;
-        return (Y_MAP[key] || START_Y) + (si * NODE_GAP);
+            // 1. 自动校准类目列表 (防止 JSON 里有的词 categories 里没有导致崩溃)
+            Object.keys(DATA.categories).forEach(key => {
+                DATA.papers.forEach(p => {
+                    const vals = Array.isArray(p[key]) ? p[key] : [p[key]];
+                    vals.forEach(v => { if(!DATA.categories[key].includes(v)) DATA.categories[key].push(v); });
+                });
+            });
+
+            // 2. 排序并计算“弹性时间轴”
+            // 按时间先后排序
+            DATA.papers.sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month));
+            
+            const firstP = DATA.papers[0];
+            const lastP = DATA.papers[DATA.papers.length - 1];
+
+            // 核心逻辑：遍历从第一篇到最后一篇的所有月份，计算每一月的 Y 坐标
+            let currentY = START_Y;
+            for (let yr = firstP.year; yr <= lastP.year; yr++) {
+                for (let mo = 1; mo <= 12; mo++) {
+                    // 跳过第一篇之前的月份
+                    if (yr === firstP.year && mo < firstP.month) continue;
+                    // 结束于最后一篇之后的月份
+                    if (yr === lastP.year && mo > lastP.month) break;
+
+                    const key = `${yr}-${mo}`;
+                    Y_MAP[key] = currentY;
+
+                    // 找出该月有多少篇论文
+                    const inMonth = DATA.papers.filter(p => p.year === yr && p.month === mo);
+                    // 为该月的论文分配堆叠索引
+                    inMonth.forEach((p, i) => p.stackIndex = i);
+
+                    // 计算下个月的起点：当前月高度取决于论文数量
+                    // 每个点占 NODE_GAP，再加上基础缓冲
+                    const monthContentHeight = inMonth.length * NODE_GAP + 20;
+                    currentY += Math.max(MIN_MONTH_HEIGHT, monthContentHeight);
+                }
+            }
+
+            // 3. 设置容器高度
+            document.getElementById('main-container').style.minHeight = `${currentY + 200}px`;
+
+            // 4. 显示 UI
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('app').classList.remove('opacity-0');
+            updateGroupBy('mod');
+
+            window.addEventListener('resize', () => renderTree());
+        } catch (e) {
+            document.getElementById('loading').innerHTML = `<p class="text-red-500">${e.message}</p>`;
+        }
     }
 
     function updateGroupBy(v) {
@@ -156,58 +154,55 @@
             b.classList.remove('bg-indigo-600', 'text-white');
             b.classList.add('text-slate-500');
         });
-        const activeBtn = document.getElementById(`btn-${v}`);
-        if (activeBtn) activeBtn.classList.add('bg-indigo-600', 'text-white');
+        document.getElementById(`btn-${v}`).classList.add('bg-indigo-600', 'text-white');
         renderTree();
     }
 
     function renderTree() {
+        if (!DATA) return;
         const svg = document.getElementById('tree-svg');
         const nodesLayer = document.getElementById('nodes-layer');
         const timelineMarks = document.getElementById('timeline-marks');
         const container = document.getElementById('main-container');
-        
         svg.innerHTML = ''; nodesLayer.innerHTML = ''; timelineMarks.innerHTML = '';
 
         const width = container.offsetWidth;
-        const cats = DATA.categories[currentGroup] || [];
-        const colWidth = (width - 240) / Math.max(1, cats.length);
-        const rootX = width / 2;
+        const cats = DATA.categories[currentGroup];
+        const colWidth = (width - 240) / cats.length;
         const lanePositions = cats.map((_, i) => 180 + (i * colWidth) + (colWidth / 2));
-        const totalHeight = parseInt(container.style.minHeight);
 
-        // Year Markers
-        const relevantYears = [...new Set(DATA.papers.map(p => p.year))].sort();
-        relevantYears.forEach(yr => {
-            const marker = document.createElement('div');
-            marker.className = "year-marker";
-            const firstMonthOfYr = Object.keys(Y_MAP).find(k => k.startsWith(`${yr}-`));
-            marker.style.top = `${Y_MAP[firstMonthOfYr] || START_Y}px`;
-            marker.innerHTML = `<span>${yr}</span>`;
-            timelineMarks.appendChild(marker);
+        // 绘制年份标记 (只在每年的 1 月位置画，或者该年第一篇论文位置)
+        const years = [...new Set(DATA.papers.map(p => p.year))];
+        years.forEach(yr => {
+            const m = document.createElement('div');
+            m.className = "year-marker";
+            // 找到该年份第一篇出现的月份坐标
+            const firstEntry = Object.keys(Y_MAP).find(k => k.startsWith(yr));
+            m.style.top = `${Y_MAP[firstEntry]}px`;
+            m.innerHTML = `<span>${yr}</span>`;
+            timelineMarks.appendChild(m);
         });
 
+        // 绘制支柱
         cats.forEach((cat, i) => {
             const laneX = lanePositions[i];
             const color = `hsl(${220 + (i * (360/cats.length))}, 70%, 60%)`;
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            const firstY = Object.values(Y_MAP)[0] || START_Y;
-            // Root curves split high but land at lanes further down to create a clean gap
-            path.setAttribute("d", `M ${rootX} 80 C ${rootX} 250, ${laneX} 150, ${laneX} ${firstY - 60} L ${laneX} ${totalHeight}`);
-            path.setAttribute("class", "branch-path");
-            path.setAttribute("stroke", color);
+            path.setAttribute("d", `M ${width/2} 80 C ${width/2} 250, ${laneX} 150, ${laneX} 350 L ${laneX} ${container.offsetHeight}`);
+            path.setAttribute("class", "branch-path"); path.setAttribute("stroke", color);
             svg.appendChild(path);
 
-            const header = document.createElement('div');
-            header.className = "category-header";
-            header.style.left = `${laneX}px`; header.style.top = `${firstY - 80}px`;
-            header.style.transform = "translateX(-50%)"; header.style.color = color;
-            header.textContent = cat;
-            nodesLayer.appendChild(header);
+            const h = document.createElement('div');
+            h.className = "category-header";
+            h.style.left = `${laneX}px`; h.style.top = `330px`;
+            h.style.transform = "translateX(-50%)"; h.style.color = color;
+            h.textContent = cat;
+            nodesLayer.appendChild(h);
         });
 
+        // 绘制论文节点
         DATA.papers.forEach(p => {
-            const y = getY(p.year, p.month, p.stackIndex);
+            const y = (Y_MAP[`${p.year}-${p.month}`] || START_Y) + (p.stackIndex * NODE_GAP);
             const val = p[currentGroup];
             const targetIndices = (Array.isArray(val) ? val : [val]).map(v => cats.indexOf(v)).filter(idx => idx !== -1);
             
@@ -215,24 +210,19 @@
                 const xs = targetIndices.map(i => lanePositions[i]);
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 line.setAttribute("d", `M ${Math.min(...xs)} ${y} L ${Math.max(...xs)} ${y}`);
-                line.setAttribute("class", "convergence-line");
-                svg.appendChild(line);
+                line.setAttribute("class", "convergence-line"); svg.appendChild(line);
             }
 
             targetIndices.forEach(idx => {
                 const group = document.createElement('div');
                 group.className = "node-group";
                 const node = document.createElement('div');
-                node.className = "node-point";
-                node.style.left = `${lanePositions[idx]}px`; node.style.top = `${y}px`;
+                node.className = "node-point"; node.style.left = `${lanePositions[idx]}px`; node.style.top = `${y}px`;
                 node.style.backgroundColor = `hsl(${220 + (idx * (360/cats.length))}, 70%, 60%)`;
                 node.onclick = () => showDetail(p);
-                
                 const label = document.createElement('div');
-                label.className = "node-label";
-                label.style.left = `${lanePositions[idx]}px`; label.style.top = `${y}px`;
+                label.className = "node-label"; label.style.left = `${lanePositions[idx]}px`; label.style.top = `${y}px`;
                 label.textContent = p.name;
-                
                 group.appendChild(node); group.appendChild(label);
                 nodesLayer.appendChild(group);
             });
@@ -242,38 +232,32 @@
     function showDetail(p) {
         document.getElementById('detail-modal').classList.remove('hidden');
         document.getElementById('modal-content').innerHTML = `
-            <div class="flex flex-wrap items-center gap-4 mb-10">
-                <span class="bg-indigo-600 text-white px-5 py-2 rounded-2xl text-[11px] font-black tracking-[0.2em] uppercase">${p.year}.${p.month.toString().padStart(2, '0')}</span>
-                <span class="bg-slate-800 text-indigo-400 px-5 py-2 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] border border-indigo-500/10">${p.base}</span>
+            <button onclick="closeModal()" class="absolute top-10 right-10 text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-10 h-10"></i></button>
+            <div class="flex items-center gap-3 mb-8">
+                <span class="px-5 py-1.5 bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-black uppercase tracking-widest">${p.year}.${p.month}</span>
+                <span class="px-5 py-1.5 bg-slate-800 text-slate-400 rounded-full text-xs font-bold uppercase tracking-widest">${p.base}</span>
             </div>
-            <h2 class="text-5xl font-black text-white mb-10 tracking-tighter leading-[1.1]">${p.name}</h2>
-            <div class="mb-12">
-                <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-4">Paper Abstract / Metadata</p>
-                <p class="text-2xl text-slate-400 leading-relaxed font-light">${p.desc || "Human video generation milestone."}</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
-                <div class="bg-slate-800/30 p-6 rounded-[2rem] border border-white/5">
-                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2">Input Modalities</p>
-                    <div class="flex flex-wrap gap-2">
-                        ${p.mod.map(m => `<span class="bg-indigo-500/10 text-indigo-300 px-3 py-1 rounded-lg text-xs font-bold">${m}</span>`).join('')}
-                    </div>
+            <h2 class="text-6xl font-black text-white mb-8 tracking-tighter leading-tight">${p.name}</h2>
+            <p class="text-2xl text-slate-400 mb-12 font-light leading-relaxed">${p.desc}</p>
+            <div class="grid grid-cols-2 gap-6 mb-12">
+                <div class="p-8 bg-white/5 border border-white/10 rounded-[2.5rem]">
+                    <p class="text-[10px] uppercase font-bold text-slate-500 mb-2">Modalities</p>
+                    <div class="flex flex-wrap gap-2">${p.mod.map(m => `<span class="px-3 py-1 bg-indigo-500/10 text-indigo-300 rounded-lg text-xs font-bold">${m}</span>`).join('')}</div>
                 </div>
-                <div class="bg-slate-800/30 p-6 rounded-[2rem] border border-white/5">
-                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2">Primary Goal</p>
-                    <span class="text-white text-lg font-bold">${p.task}</span>
+                <div class="p-8 bg-white/5 border border-white/10 rounded-[2.5rem]">
+                    <p class="text-[10px] uppercase font-bold text-slate-500 mb-2">Goal</p>
+                    <p class="text-white font-black text-xl">${p.task}</p>
                 </div>
             </div>
-            <div class="flex flex-col sm:flex-row gap-6">
-                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-6 rounded-[2.5rem] text-center font-black text-xl hover:bg-indigo-600 hover:text-white transition-all shadow-2xl">Read Paper</a>
-                ${p.code ? `<a href="${p.code}" target="_blank" class="flex-1 bg-slate-800 text-white py-6 rounded-[2.5rem] text-center font-black text-xl hover:bg-indigo-500 transition-all border border-white/10 flex items-center justify-center gap-3"><i data-lucide="github" class="w-6 h-6"></i>View Code</a>` : `<button class="flex-1 border border-white/10 text-slate-600 py-6 rounded-[2.5rem] font-bold text-xl cursor-not-allowed">Code Not Available</button>`}
-                <button onclick="closeModal()" class="px-12 border border-white/10 text-slate-500 py-6 rounded-[2.5rem] font-bold text-xl hover:text-white transition">Dismiss</button>
+            <div class="flex gap-4">
+                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-6 rounded-3xl text-center font-black text-xl hover:bg-indigo-500 hover:text-white transition">Read Paper</a>
+                ${p.code ? `<a href="${p.code}" target="_blank" class="flex-1 bg-indigo-600 text-white py-6 rounded-3xl text-center font-black text-xl hover:bg-indigo-500 transition flex items-center justify-center gap-2"><i data-lucide="github"></i>View Code</a>` : `<span class="flex-1 bg-slate-800 text-slate-500 py-6 rounded-3xl text-center font-black text-xl cursor-not-allowed">Code Not Available</span>`}
             </div>
         `;
-        if (window.lucide) lucide.createIcons();
+        lucide.createIcons();
     }
-
     function closeModal() { document.getElementById('detail-modal').classList.add('hidden'); }
-    window.addEventListener('DOMContentLoaded', init);
+    window.onload = init;
 </script>
 </body>
 </html>
