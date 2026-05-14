@@ -1,6 +1,5 @@
 {
 "papers": [
-/* --- 2026 NEWS (Batch 1) --- */
 { "id": 1, "name": "Improving Human Image Animation", "year": 2026, "month": 5, "mod": ["Text"], "task": "Animation", "base": "DiT", "desc": "Semantic Representation Alignment.", "link": "https://arxiv.org/abs/2605.10523" },
 { "id": 2, "name": "SocialDirector", "year": 2026, "month": 5, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Training-Free Social Interaction Control.", "link": "https://arxiv.org/abs/2605.10079" },
 { "id": 3, "name": "SDTalk", "year": 2026, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "GAN", "desc": "Structured Facial Priors for Gaussian Talking Head.", "link": "https://arxiv.org/abs/2605.09956" },
@@ -19,7 +18,6 @@
 { "id": 16, "name": "HumANDiff", "year": 2026, "month": 4, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Articulated Noise Diffusion for Consistency.", "link": "https://arxiv.org/abs/2604.05961" },
 { "id": 17, "name": "AvatarForcing", "year": 2026, "month": 3, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "One-Step Streaming Talking Avatars.", "link": "https://arxiv.org/abs/2603.14331" },
 { "id": 18, "name": "Kling-MotionControl", "year": 2026, "month": 3, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Technical report for Kling motion control.", "link": "https://arxiv.org/abs/2603.03160" },
-/* --- 2025 HISTORICAL UPDATES (Part A) --- */
 { "id": 19, "name": "LiveTalk", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Real-time multimodal interactive video diffusion.", "link": "https://arxiv.org/abs/2512.23576" },
 { "id": 20, "name": "ByteLoom", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Consistent human-object interactions via curriculum learning.", "link": "https://arxiv.org/abs/2512.22854" },
 { "id": 21, "name": "MoFu", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Scale-aware modulation for multi-subject video.", "link": "https://arxiv.org/abs/2512.22310" },
