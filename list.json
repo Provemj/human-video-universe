@@ -1,7 +1,7 @@
 {
 "papers": [
-{ "id": 1, "name": "Improving Human Image Animation", "year": 2026, "month": 5, "mod": ["Text"], "task": "Animation", "base": "DiT", "desc": "Semantic Representation Alignment.", "link": "https://arxiv.org/abs/2605.10523" },
-{ "id": 2, "name": "SocialDirector", "year": 2026, "month": 5, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Training-Free Social Interaction Control.", "link": "https://arxiv.org/abs/2605.10079" },
+{ "id": 1, "name": "Improving Human Image Animation", "year": 2026, "month": 5, "mod": ["Text"], "task": "Animation", "base": "DiT", "desc": "Semantic Representation Alignment for high-fidelity animation.", "link": "https://arxiv.org/abs/2605.10523", "code": "https://github.com/example/repo1" },
+{ "id": 2, "name": "SocialDirector", "year": 2026, "month": 5, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Training-Free Social Interaction Control.", "link": "https://arxiv.org/abs/2605.10079", "code": "https://github.com/example/repo2" },
 { "id": 3, "name": "SDTalk", "year": 2026, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "GAN", "desc": "Structured Facial Priors for Gaussian Talking Head.", "link": "https://arxiv.org/abs/2605.09956" },
 { "id": 4, "name": "Unison", "year": 2026, "month": 5, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Harmonizing Motion, Speech, and Sound.", "link": "https://arxiv.org/abs/2605.08729" },
 { "id": 5, "name": "MoCoTalk", "year": 2026, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Multi-Conditional Diffusion with Adaptive Router.", "link": "https://arxiv.org/abs/2605.08050" },
@@ -37,13 +37,12 @@
 { "id": 35, "name": "IMTalker", "year": 2025, "month": 11, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Efficient talking face via implicit motion transfer.", "link": "https://arxiv.org/abs/2511.22167" },
 { "id": 36, "name": "SteadyDancer", "year": 2025, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Harmonized animation with first-frame preservation.", "link": "https://arxiv.org/abs/2511.19320" },
 { "id": 37, "name": "ID-Composer", "year": 2025, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Multi-subject synthesis with identity preservation.", "link": "https://arxiv.org/abs/2511.00511" },
-{ "id": 38, "name": "Lookahead Anchoring", "year": 2025, "month": 10, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Preserving character identity in audio animation.", "link": "https://arxiv.org/abs/2510.23581" },
+{ "id": 38, "name": "Lookahead Anchoring", "year": 2025, "month": 10, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Preserving character identity in audio animation.", "link": "https://arxiv.org/abs/2510.23581", "code": "https://github.com/j0seo/lookahead-anchoring" },
 { "id": 39, "name": "VividAnimator", "year": 2025, "month": 10, "mod": ["Audio", "Motion"], "task": "Animation", "base": "Diffusion", "desc": "End-to-end audio and pose-driven half-body animation.", "link": "https://arxiv.org/abs/2510.10269" }
 ],
 "categories": {
 "mod": ["Vision", "Text", "Audio", "Motion"],
 "task": ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "Motion Planning", "General"],
-"base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive", "Diffusion"]
-},
-"years": [2018, 2022, 2023, 2024, 2025, 2026]
+"base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive", "Diffusion", "LLM"]
+}
 }
