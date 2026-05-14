@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Video Universe - Evolution Survey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050810;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        .timeline-container {
+            position: relative;
+            background: radial-gradient(circle at top, #111827 0%, #050810 80%);
+            border-radius: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            margin-top: 2rem;
+            min-height: 1600px;
+        }
+        .year-marker {
+            position: absolute;
+            left: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100px;
+            z-index: 10;
+        }
+        .year-marker::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: linear-gradient(to right, #1e293b, transparent);
+        }
+        .branch-path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            opacity: 0.15;
+            transition: opacity 0.4s, stroke-width 0.4s;
+        }
+        .convergence-line {
+            fill: none;
+            stroke-width: 1.5;
+            stroke-dasharray: 4 4;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .node-group:hover .convergence-line {
+            opacity: 0.5;
+        }
+        .node-point {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid #050810;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .node-point:hover {
+            transform: translate(-50%, -50%) scale(2.2);
+            box-shadow: 0 0 30px currentColor;
+        }
+        .node-label {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #fff;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 4px 10px;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translate(15px, -50%);
+            transition: opacity 0.2s, transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .node-group:hover .node-label {
+            opacity: 1;
+            transform: translate(20px, -50%);
+        }
+        .category-header {
+            position: absolute;
+            text-align: center;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border-radius: 99px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="max-w-[1600px] mx-auto p-6 md:p-10">
+    <header class="mb-12 flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8">
+        <div>
+            <div class="flex items-center gap-4 mb-3">
+                <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/30">
+                    <i data-lucide="network" class="text-white w-8 h-8"></i>
+                </div>
+                <h1 class="text-5xl font-black text-white tracking-tighter">Human Video <span class="text-indigo-500">Universe</span></h1>
+            </div>
+            <p class="text-slate-400 max-w-xl text-base leading-relaxed">
+                The first interactive <span class="text-white font-bold">convergence-aware</span> survey. 
+                Visualizing the evolution of multimodal priors in human video synthesis.
+            </p>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-3 bg-slate-900/40 p-2 rounded-2xl border border-white/5 shadow-inner">
+            <span class="text-[10px] font-black text-slate-500 uppercase px-4 tracking-[0.2em]">Group By:</span>
+            <button onclick="updateGroupBy('mod')" id="btn-mod" class="px-6 py-2.5 rounded-xl text-xs font-bold transition">Modality</button>
+            <button onclick="updateGroupBy('task')" id="btn-task" class="px-6 py-2.5 rounded-xl text-xs font-bold transition">Primary Task</button>
+            <button onclick="updateGroupBy('base')" id="btn-base" class="px-6 py-2.5 rounded-xl text-xs font-bold transition">Architecture</button>
+        </div>
+    </header>
+
+    <div class="timeline-container shadow-2xl relative overflow-hidden border border-white/5">
+        <div class="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center z-50">
+            <div class="w-8 h-8 bg-white rounded-full shadow-[0_0_40px_#6366f1] ring-8 ring-indigo-500/10"></div>
+            <span class="text-[10px] font-black text-white mt-4 uppercase tracking-[0.4em]">Foundation Models</span>
+        </div>
+
+        <svg id="tree-svg" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
+        <div id="timeline-marks" class="absolute inset-0 pointer-events-none"></div>
+        <div id="nodes-layer" class="absolute inset-0"></div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div id="detail-modal" class="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl hidden z-[100] flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-white/5 rounded-[3.5rem] max-w-3xl w-full p-12 relative shadow-2xl">
+        <button onclick="closeModal()" class="absolute top-10 right-10 text-slate-500 hover:text-white transition">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+        <div id="modal-content"></div>
+    </div>
+</div>
+
+<script>
+    const DATA = {
+        papers: [
+            { id: 1, name: "Sora", year: 2024, month: 2, mod: ["Text"], task: "General", base: "DiT", desc: "Large-scale diffusion transformer for high-fidelity video generation.", link: "#" },
+            { id: 2, name: "AnimateAnyone", year: 2023, month: 11, mod: ["Vision"], task: "Animation", base: "UNet", desc: "Reference-Net based high-fidelity human animation.", link: "#" },
+            { id: 3, name: "MuseTalk", year: 2024, month: 4, mod: ["Audio"], task: "Talking Head", base: "UNet", desc: "Real-time lip-sync with localized facial refinement.", link: "#" },
+            { id: 4, name: "V-Express", year: 2024, month: 6, mod: ["Audio", "Motion"], task: "Talking Head", base: "UNet", desc: "A hybrid model balancing audio-sync and pose control.", link: "#" },
+            { id: 5, name: "Champ", year: 2024, month: 3, mod: ["Motion"], task: "Animation", base: "UNet", desc: "3D skeleton-guided motion synthesis.", link: "#" },
+            { id: 16, name: "V-Flow", year: 2025, month: 2, mod: ["Text", "Motion", "Vision"], task: "General", base: "Flow Matching", desc: "Next-gen multi-condition flow matching system.", link: "#" },
+            { id: 17, name: "LivePortrait", year: 2024, month: 10, mod: ["Vision"], task: "Talking Head", base: "GAN", desc: "Stitch-capable portrait animation.", link: "#" },
+            { id: 18, name: "EchoMimic", year: 2024, month: 7, mod: ["Audio", "Motion"], task: "Animation", base: "UNet", desc: "Synchronized facial and body motion from dual cues.", link: "#" }
+        ],
+        categories: {
+            mod: ["Vision", "Text", "Audio", "Motion"],
+            task: ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "General"],
+            base: ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive"]
+        },
+        years: [2023, 2024, 2025]
+    };
+
+    let currentGroup = 'mod';
+    const START_Y = 320; 
+    const YEAR_HEIGHT = 450; 
+    const BASE_YEAR = 2023;
+
+    function init() {
+        updateGroupBy('mod');
+        lucide.createIcons();
+        window.addEventListener('resize', () => renderTree());
+    }
+
+    function updateGroupBy(val) {
+        currentGroup = val;
+        document.querySelectorAll('button[id^="btn-"]').forEach(b => {
+            b.classList.remove('bg-indigo-600', 'text-white', 'shadow-indigo-500/30', 'shadow-lg');
+            b.classList.add('bg-slate-800/50', 'text-slate-400');
+        });
+        const active = document.getElementById(`btn-${val}`);
+        active.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
+        renderTree();
+    }
+
+    function getYCoordinate(year, month) {
+        const yearFraction = (year - BASE_YEAR) + ((month - 1) / 12);
+        return START_Y + (yearFraction * YEAR_HEIGHT);
+    }
+
+    function renderTree() {
+        const svg = document.getElementById('tree-svg');
+        const nodesLayer = document.getElementById('nodes-layer');
+        const timelineMarks = document.getElementById('timeline-marks');
+        const container = document.querySelector('.timeline-container');
+        
+        svg.innerHTML = '';
+        nodesLayer.innerHTML = '';
+        timelineMarks.innerHTML = '';
+
+        const width = container.offsetWidth;
+        const cats = DATA.categories[currentGroup];
+        const colWidth = (width - 180) / cats.length; 
+        const rootX = width / 2;
+        const rootY = 50;
+        const splitY = 220;
+
+        // Draw Year Markers
+        DATA.years.forEach(year => {
+            const y = getYCoordinate(year, 1);
+            const marker = document.createElement('div');
+            marker.className = "year-marker";
+            marker.style.top = `${y}px`;
+            marker.innerHTML = `<span>${year}</span>`;
+            timelineMarks.appendChild(marker);
+        });
+
+        const lanePositions = cats.map((_, i) => 140 + (i * colWidth) + (colWidth / 2));
+
+        cats.forEach((cat, i) => {
+            const laneX = lanePositions[i];
+            const color = `hsl(${210 + (i * (360/cats.length))}, 70%, 60%)`;
+            
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M ${rootX} ${rootY} C ${rootX} ${splitY * 0.8}, ${laneX} ${splitY * 0.4}, ${laneX} ${splitY} L ${laneX} 2000`);
+            path.setAttribute("class", "branch-path");
+            path.setAttribute("stroke", color);
+            svg.appendChild(path);
+
+            const header = document.createElement('div');
+            header.className = "category-header";
+            header.style.left = `${laneX}px`;
+            header.style.top = `${splitY - 30}px`;
+            header.style.transform = "translateX(-50%)";
+            header.style.color = color;
+            header.textContent = cat;
+            nodesLayer.appendChild(header);
+        });
+
+        DATA.papers.forEach(p => {
+            const y = getYCoordinate(p.year, p.month);
+            
+            // Collect all relevant lane indices for this paper
+            let targetLaneIndices = [];
+            if (currentGroup === 'mod') {
+                p.mod.forEach(m => {
+                    const idx = cats.indexOf(m);
+                    if (idx !== -1) targetLaneIndices.push(idx);
+                });
+            } else {
+                const idx = cats.indexOf(p[currentGroup]);
+                if (idx !== -1) targetLaneIndices.push(idx);
+            }
+
+            if (targetLaneIndices.length === 0) return;
+
+            // Draw a horizontal convergence line if there are multiple lanes
+            if (targetLaneIndices.length > 1) {
+                const minX = Math.min(...targetLaneIndices.map(i => lanePositions[i]));
+                const maxX = Math.max(...targetLaneIndices.map(i => lanePositions[i]));
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                line.setAttribute("d", `M ${minX} ${y} L ${maxX} ${y}`);
+                line.setAttribute("class", "convergence-line");
+                line.setAttribute("stroke", "#4f46e5");
+                line.dataset.paperId = p.id;
+                svg.appendChild(line);
+            }
+
+            // Create a node group to wrap the points and labels for this paper across all its lanes
+            targetLaneIndices.forEach(catIndex => {
+                const laneX = lanePositions[catIndex];
+                const color = `hsl(${210 + (catIndex * (360/cats.length))}, 70%, 60%)`;
+
+                const group = document.createElement('div');
+                group.className = "node-group";
+                // Link the group to the horizontal line via JS events
+                group.onmouseenter = () => {
+                   document.querySelectorAll(`.convergence-line[data-paper-id="${p.id}"]`).forEach(l => l.style.opacity = "0.8");
+                };
+                group.onmouseleave = () => {
+                   document.querySelectorAll(`.convergence-line[data-paper-id="${p.id}"]`).forEach(l => l.style.opacity = "0");
+                };
+
+                const node = document.createElement('div');
+                node.className = "node-point";
+                node.style.left = `${laneX}px`;
+                node.style.top = `${y}px`;
+                node.style.color = color;
+                node.style.backgroundColor = color;
+                node.onclick = () => showDetail(p);
+                
+                const label = document.createElement('div');
+                label.className = "node-label";
+                label.style.left = `${laneX}px`;
+                label.style.top = `${y}px`;
+                label.textContent = p.name;
+
+                group.appendChild(node);
+                group.appendChild(label);
+                nodesLayer.appendChild(group);
+            });
+        });
+    }
+
+    function showDetail(p) {
+        const modal = document.getElementById('detail-modal');
+        const content = document.getElementById('modal-content');
+        modal.classList.remove('hidden');
+        content.innerHTML = `
+            <div class="flex flex-wrap items-center gap-3 mb-10">
+                <span class="px-5 py-1.5 bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-black tracking-widest">${p.year}.${p.month.toString().padStart(2, '0')}</span>
+                <span class="px-5 py-1.5 bg-slate-800 text-slate-400 rounded-full text-xs font-bold uppercase tracking-widest">${p.base} Architecture</span>
+            </div>
+            <h2 class="text-7xl font-black text-white mb-10 tracking-tighter">${p.name}</h2>
+            <p class="text-2xl text-slate-400 leading-relaxed mb-12 font-light">
+                ${p.desc}
+            </p>
+            <div class="grid grid-cols-2 gap-6 mb-12">
+                 <div class="p-8 bg-white/5 border border-white/10 rounded-[2.5rem]">
+                    <p class="text-[10px] uppercase font-bold text-slate-500 mb-3 tracking-widest">Input Modalities</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${p.mod.map(m => `<span class="px-3 py-1 bg-indigo-500/10 text-indigo-300 rounded-lg text-xs font-bold">${m}</span>`).join('')}
+                    </div>
+                 </div>
+                 <div class="p-8 bg-white/5 border border-white/10 rounded-[2.5rem]">
+                    <p class="text-[10px] uppercase font-bold text-slate-500 mb-3 tracking-widest">Primary Objective</p>
+                    <p class="text-white font-black text-xl">${p.task}</p>
+                 </div>
+            </div>
+            <div class="flex gap-4">
+                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-slate-950 py-6 rounded-3xl text-center font-black text-xl hover:bg-indigo-500 hover:text-white transition shadow-2xl">Read Arxiv Paper</a>
+                <button onclick="closeModal()" class="px-12 border border-white/10 text-slate-500 py-6 rounded-3xl font-bold text-xl hover:border-white/20 hover:text-white transition">Dismiss</button>
+            </div>
+        `;
+        lucide.createIcons();
+    }
+
+    function closeModal() { document.getElementById('detail-modal').classList.add('hidden'); }
+
+    window.onload = init;
+</script>
+
+</body>
+</html>
