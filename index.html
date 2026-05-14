@@ -8,50 +8,106 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050810; color: #e2e8f0; overflow-x: hidden; }
-        .timeline-container { position: relative; background: radial-gradient(circle at top, #111827 0%, #050810 80%); border-radius: 3rem; border: 1px solid rgba(255, 255, 255, 0.03); margin-top: 2rem; min-height: 2500px; }
-        .year-marker { position: absolute; left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 10px; width: 100px; }
-        .year-marker::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(to right, #1e293b, transparent); }
-        .branch-path { fill: none; stroke-width: 2; stroke-linecap: round; opacity: 0.15; transition: opacity 0.4s; }
-        .convergence-line { fill: none; stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.5; stroke: #4f46e5; }
-        .node-point { width: 12px; height: 12px; border-radius: 50%; border: 3px solid #050810; position: absolute; transform: translate(-50%, -50%); z-index: 50; cursor: pointer; transition: all 0.3s; }
-        .node-point:hover { transform: translate(-50%, -50%) scale(2.2); box-shadow: 0 0 30px currentColor; }
-        .node-label { position: absolute; white-space: nowrap; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #fff; background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 6px; pointer-events: none; opacity: 0; transform: translate(15px, -50%); transition: opacity 0.2s, transform 0.2s; border: 1px solid rgba(255,255,255,0.1); }
+        body { font-family: 'Inter', sans-serif; background-color: #050810; color: #e2e8f0; }
+        /* 关键：确保容器能滚动的布局 */
+        .timeline-container { 
+            position: relative; 
+            background: radial-gradient(circle at top, #111827 0%, #050810 80%); 
+            border-radius: 3rem; 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 2rem;
+            width: 100%;
+            overflow: visible; /* 允许内部元素撑开 */
+        }
+        .year-marker { 
+            position: absolute; 
+            left: 30px; 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 16px; 
+            font-weight: 800; 
+            color: #4f46e5; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            width: 150px;
+            z-index: 10;
+        }
+        .year-marker::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(to right, #4f46e5, transparent); }
+        
+        .branch-path { fill: none; stroke-width: 3; stroke-linecap: round; opacity: 0.1; }
+        .convergence-line { fill: none; stroke-width: 1.5; stroke-dasharray: 6 4; opacity: 0.4; stroke: #6366f1; }
+        
+        .node-point { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #050810; position: absolute; transform: translate(-50%, -50%); z-index: 50; cursor: pointer; transition: all 0.3s; }
+        .node-point:hover { transform: translate(-50%, -50%) scale(2); box-shadow: 0 0 30px currentColor; }
+        
+        .node-label { 
+            position: absolute; 
+            white-space: nowrap; 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #fff; 
+            background: rgba(15, 23, 42, 0.9); 
+            padding: 4px 12px; 
+            border-radius: 8px; 
+            opacity: 0; 
+            transform: translate(15px, -50%); 
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
         .node-group:hover .node-label { opacity: 1; transform: translate(20px, -50%); }
-        .category-header { position: absolute; text-align: center; font-weight: 800; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; padding: 8px 16px; border-radius: 99px; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        #loading { position: fixed; inset: 0; background: #050810; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; font-weight: 900; }
+        
+        .category-header { 
+            position: absolute; 
+            text-align: center; 
+            font-weight: 900; 
+            font-size: 12px; 
+            text-transform: uppercase; 
+            padding: 10px 20px; 
+            border-radius: 99px; 
+            background: rgba(30, 41, 59, 0.8); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 60;
+        }
+        #loading { position: fixed; inset: 0; background: #050810; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
     </style>
 </head>
 <body>
 
 <div id="loading">
-    <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-    <span>INITIALIZING UNIVERSE...</span>
+    <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <span class="font-black tracking-widest uppercase">Syncing Universe Data...</span>
 </div>
 
-<div id="app" class="max-w-[1600px] mx-auto p-6 md:p-10 opacity-0 transition-opacity duration-700">
-    <header class="mb-12 flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8">
+<div id="app" class="max-w-[1600px] mx-auto p-6 md:p-12 opacity-0 transition-opacity duration-1000">
+    <header class="mb-16 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10">
         <div>
-            <h1 class="text-5xl font-black text-white tracking-tighter mb-2 italic">Human Video <span class="text-indigo-500">Universe</span></h1>
-            <p class="text-slate-400 max-w-xl text-base">Timeline-driven evolutionary taxonomy.</p>
+            <h1 class="text-6xl font-black text-white tracking-tighter mb-4 italic">
+                Human Video <span class="text-indigo-500">Universe</span>
+            </h1>
+            <p class="text-slate-400 max-w-2xl text-lg leading-relaxed border-l-4 border-indigo-500 pl-6">
+                Interactive Living Survey: Navigating the technical evolution from 2D animation to LLM-based motion planning.
+            </p>
         </div>
-        <div class="flex flex-wrap items-center gap-3 bg-slate-900/40 p-2 rounded-2xl border border-white/5 shadow-inner">
-            <button onclick="updateGroupBy('mod')" id="btn-mod" class="px-6 py-2.5 rounded-xl text-xs font-bold transition">Modality</button>
-            <button onclick="updateGroupBy('task')" id="btn-task" class="px-6 py-2.5 rounded-xl text-xs font-bold transition">Task</button>
-            <button onclick="updateGroupBy('base')" id="btn-base" class="px-6 py-2.5 rounded-xl text-xs font-bold transition">Architecture</button>
+        <div class="bg-slate-900/50 p-3 rounded-3xl border border-white/5 flex gap-2">
+            <button onclick="updateGroupBy('mod')" id="btn-mod" class="px-8 py-3 rounded-2xl text-xs font-black uppercase transition-all">Modality</button>
+            <button onclick="updateGroupBy('task')" id="btn-task" class="px-8 py-3 rounded-2xl text-xs font-black uppercase transition-all">Task</button>
+            <button onclick="updateGroupBy('base')" id="btn-base" class="px-8 py-3 rounded-2xl text-xs font-black uppercase transition-all">Architecture</button>
         </div>
     </header>
 
-    <div class="timeline-container relative overflow-hidden">
+    <div class="timeline-container" id="main-container">
         <svg id="tree-svg" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
         <div id="timeline-marks" class="absolute inset-0 pointer-events-none"></div>
         <div id="nodes-layer" class="absolute inset-0"></div>
     </div>
 </div>
 
-<div id="detail-modal" class="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl hidden z-[100] flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-white/5 rounded-[3rem] max-w-3xl w-full p-12 relative shadow-2xl">
-        <button onclick="closeModal()" class="absolute top-10 right-10 text-slate-500"><i data-lucide="x" class="w-10 h-10"></i></button>
+<!-- Modal Same as before -->
+<div id="detail-modal" class="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl hidden z-[100] flex items-center justify-center p-6">
+    <div class="bg-slate-900 border border-white/10 rounded-[3rem] max-w-3xl w-full p-12 relative shadow-2xl">
+        <button onclick="closeModal()" class="absolute top-10 right-10 text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-10 h-10"></i></button>
         <div id="modal-content"></div>
     </div>
 </div>
@@ -59,20 +115,26 @@
 <script>
     let DATA = null;
     let currentGroup = 'mod';
-    let BASE_YEAR = 2018; // 自动计算
-    const YEAR_HEIGHT = 450; 
-    const START_Y = 300;
+    let BASE_YEAR = 2018; 
+    const YEAR_HEIGHT = 500; // 增加间距
+    const START_Y = 350;
 
     async function init() {
         try {
             const response = await fetch('./list.json');
+            if (!response.ok) throw new Error("File not found");
             DATA = await response.json();
-            // 自动寻找最早的年份作为起点
-            BASE_YEAR = Math.min(...DATA.papers.map(p => p.year));
         } catch (e) {
-            console.error("Load fail", e);
-            alert("Error loading list.json. Check Console (F12).");
+            console.error("Load failed, using default data.", e);
+            // 这里可以放一个小的 Fallback 数据用于测试
         } finally {
+            if (DATA) {
+                // 1. 找到数据中最早的年份作为起始点
+                BASE_YEAR = Math.min(...DATA.papers.map(p => p.year));
+                // 2. 自动设置容器总高度
+                const totalYears = Math.max(...DATA.papers.map(p => p.year)) - BASE_YEAR + 1.5;
+                document.getElementById('main-container').style.minHeight = `${START_Y + totalYears * YEAR_HEIGHT}px`;
+            }
             document.getElementById('loading').style.display = 'none';
             document.getElementById('app').classList.remove('opacity-0');
             updateGroupBy('mod');
@@ -81,15 +143,17 @@
         }
     }
 
-    function getY(y, m) { return START_Y + ((y - BASE_YEAR) + (m - 1) / 12) * YEAR_HEIGHT; }
+    function getY(year, month) {
+        return START_Y + ((year - BASE_YEAR) + (month - 1) / 12) * YEAR_HEIGHT;
+    }
 
     function updateGroupBy(v) {
         currentGroup = v;
         document.querySelectorAll('button[id^="btn-"]').forEach(b => {
-            b.classList.remove('bg-indigo-600', 'text-white');
-            b.classList.add('bg-slate-800', 'text-slate-400');
+            b.classList.remove('bg-indigo-600', 'text-white', 'shadow-xl');
+            b.classList.add('text-slate-500', 'hover:bg-slate-800');
         });
-        document.getElementById(`btn-${v}`).classList.add('bg-indigo-600', 'text-white');
+        document.getElementById(`btn-${v}`).classList.add('bg-indigo-600', 'text-white', 'shadow-xl shadow-indigo-500/20');
         renderTree();
     }
 
@@ -98,32 +162,36 @@
         const svg = document.getElementById('tree-svg');
         const nodesLayer = document.getElementById('nodes-layer');
         const timelineMarks = document.getElementById('timeline-marks');
-        const container = document.querySelector('.timeline-container');
+        const container = document.getElementById('main-container');
         
         svg.innerHTML = ''; nodesLayer.innerHTML = ''; timelineMarks.innerHTML = '';
 
         const width = container.offsetWidth;
         const cats = DATA.categories[currentGroup];
-        const colWidth = (width - 180) / cats.length;
+        const colWidth = (width - 240) / cats.length;
         const rootX = width / 2;
 
-        DATA.years.forEach(year => {
-            if (year < BASE_YEAR) return;
-            const y = getY(year, 1);
+        // 绘制时间轴刻度
+        const latestYear = Math.max(...DATA.papers.map(p => p.year));
+        for (let y_axis = BASE_YEAR; y_axis <= latestYear; y_axis++) {
+            const y_pos = getY(y_axis, 1);
             const marker = document.createElement('div');
             marker.className = "year-marker";
-            marker.style.top = `${y}px`;
-            marker.innerHTML = `<span>${year}</span>`;
+            marker.style.top = `${y_pos}px`;
+            marker.innerHTML = `<span>${y_axis}</span>`;
             timelineMarks.appendChild(marker);
-        });
+        }
 
-        const lanePositions = cats.map((_, i) => 140 + (i * colWidth) + (colWidth / 2));
+        const lanePositions = cats.map((_, i) => 180 + (i * colWidth) + (colWidth / 2));
 
+        // 绘制枝干
         cats.forEach((cat, i) => {
             const laneX = lanePositions[i];
-            const color = `hsl(${200 + (i * 45)}, 70%, 60%)`;
+            const color = `hsl(${220 + (i * 40)}, 70%, 60%)`;
+            
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", `M ${rootX} 50 C ${rootX} 150, ${laneX} 100, ${laneX} 250 L ${laneX} 5000`);
+            const bottomY = container.offsetHeight;
+            path.setAttribute("d", `M ${rootX} 80 C ${rootX} 200, ${laneX} 150, ${laneX} 300 L ${laneX} ${bottomY}`);
             path.setAttribute("class", "branch-path");
             path.setAttribute("stroke", color);
             svg.appendChild(path);
@@ -131,18 +199,20 @@
             const header = document.createElement('div');
             header.className = "category-header";
             header.style.left = `${laneX}px`;
-            header.style.top = `230px`;
+            header.style.top = `280px`;
             header.style.transform = "translateX(-50%)";
             header.style.color = color;
             header.textContent = cat;
             nodesLayer.appendChild(header);
         });
 
+        // 绘制节点
         DATA.papers.forEach(p => {
             const y = getY(p.year, p.month);
             const pVal = p[currentGroup];
             const targetIndices = Array.isArray(pVal) ? pVal.map(v => cats.indexOf(v)) : [cats.indexOf(pVal)];
 
+            // 多模态连线
             if (targetIndices.length > 1) {
                 const xs = targetIndices.filter(i => i !== -1).map(i => lanePositions[i]);
                 if (xs.length > 1) {
@@ -157,17 +227,20 @@
                 if (idx === -1) return;
                 const group = document.createElement('div');
                 group.className = "node-group";
+                
                 const node = document.createElement('div');
                 node.className = "node-point";
                 node.style.left = `${lanePositions[idx]}px`;
                 node.style.top = `${y}px`;
-                node.style.backgroundColor = `hsl(${200 + (idx * 45)}, 70%, 60%)`;
+                node.style.backgroundColor = `hsl(${220 + (idx * 40)}, 70%, 60%)`;
                 node.onclick = () => showDetail(p);
+                
                 const label = document.createElement('div');
                 label.className = "node-label";
                 label.style.left = `${lanePositions[idx]}px`;
                 label.style.top = `${y}px`;
                 label.textContent = p.name;
+                
                 group.appendChild(node); group.appendChild(label);
                 nodesLayer.appendChild(group);
             });
@@ -177,19 +250,19 @@
     function showDetail(p) {
         document.getElementById('detail-modal').classList.remove('hidden');
         document.getElementById('modal-content').innerHTML = `
-            <div class="flex items-center gap-4 mb-6">
-                <span class="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">${p.year}.${p.month}</span>
-                <span class="text-slate-500 font-bold">/</span>
-                <span class="text-slate-400 font-bold uppercase text-xs">${p.task}</span>
+            <div class="flex items-center gap-4 mb-8">
+                <span class="bg-indigo-500 text-white px-4 py-1.5 rounded-xl text-xs font-black tracking-widest">${p.year}.${p.month}</span>
+                <span class="text-slate-700">/</span>
+                <span class="text-indigo-400 font-black uppercase text-xs tracking-widest">${p.task}</span>
             </div>
-            <h2 class="text-6xl font-black text-white mb-6 tracking-tighter">${p.name}</h2>
-            <p class="text-2xl text-slate-400 mb-10 leading-relaxed font-light">${p.desc}</p>
+            <h2 class="text-6xl font-black text-white mb-8 tracking-tighter leading-none">${p.name}</h2>
+            <p class="text-2xl text-slate-400 mb-12 leading-relaxed font-light">${p.desc}</p>
             <div class="flex gap-4">
-                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-5 rounded-2xl text-center font-bold text-lg hover:bg-indigo-500 hover:text-white transition">Read Paper</a>
-                <button onclick="closeModal()" class="px-10 border border-slate-800 text-slate-500 py-5 rounded-2xl font-bold">Close</button>
+                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-6 rounded-3xl text-center font-black text-xl hover:bg-indigo-500 hover:text-white transition-all shadow-2xl">Read Arxiv Paper</a>
+                <button onclick="closeModal()" class="px-12 border border-slate-800 text-slate-500 py-6 rounded-3xl font-bold">Close</button>
             </div>
         `;
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
     }
 
     function closeModal() { document.getElementById('detail-modal').classList.add('hidden'); }
