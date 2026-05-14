@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050810; color: #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background-color: #050810; color: #e2e8f0; margin: 0; }
         .timeline-container { 
             position: relative; 
             background: radial-gradient(circle at top, #111827 0%, #050810 80%); 
@@ -32,7 +32,8 @@
             z-index: 10;
         }
         .year-marker::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(to right, #4f46e5, transparent); }
-        .branch-path { fill: none; stroke-width: 3; stroke-linecap: round; opacity: 0.1; }
+        .branch-path { fill: none; stroke-width: 3; stroke-linecap: round; opacity: 0.1; transition: opacity 0.3s; }
+        .branch-path:hover { opacity: 0.3; }
         .convergence-line { fill: none; stroke-width: 1.5; stroke-dasharray: 6 4; opacity: 0.4; stroke: #6366f1; }
         .node-point { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #050810; position: absolute; transform: translate(-50%, -50%); z-index: 50; cursor: pointer; transition: all 0.3s; }
         .node-point:hover { transform: translate(-50%, -50%) scale(2); box-shadow: 0 0 30px currentColor; }
@@ -66,15 +67,15 @@
             z-index: 60;
         }
         #loading { position: fixed; inset: 0; background: #050810; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.5s; }
-        #error-msg { color: #ef4444; margin-top: 1rem; font-size: 0.875rem; max-width: 400px; text-align: center; display: none; }
+        #error-display { color: #ef4444; margin-top: 1.5rem; font-size: 0.875rem; max-width: 500px; text-align: center; display: none; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(239, 68, 68, 0.2); }
     </style>
 </head>
 <body>
 
 <div id="loading">
     <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-    <span class="font-black tracking-widest uppercase">Syncing Universe Data...</span>
-    <div id="error-msg"></div>
+    <span class="font-black tracking-widest uppercase text-indigo-400">Syncing Universe Data...</span>
+    <div id="error-display"></div>
 </div>
 
 <div id="app" class="max-w-[1600px] mx-auto p-6 md:p-12 opacity-0 transition-opacity duration-1000">
@@ -87,7 +88,7 @@
                 Interactive Living Survey: Navigating technical evolution from 2D to 3D motion planning.
             </p>
         </div>
-        <div class="bg-slate-900/50 p-3 rounded-3xl border border-white/5 flex gap-2">
+        <div class="bg-slate-900/50 p-3 rounded-3xl border border-white/5 flex flex-wrap gap-2">
             <button onclick="updateGroupBy('mod')" id="btn-mod" class="px-8 py-3 rounded-2xl text-xs font-black uppercase transition-all">Modality</button>
             <button onclick="updateGroupBy('task')" id="btn-task" class="px-8 py-3 rounded-2xl text-xs font-black uppercase transition-all">Task</button>
             <button onclick="updateGroupBy('base')" id="btn-base" class="px-8 py-3 rounded-2xl text-xs font-black uppercase transition-all">Architecture</button>
@@ -112,56 +113,61 @@
     let DATA = null;
     let currentGroup = 'mod';
     let BASE_YEAR = 2018; 
-    const YEAR_HEIGHT = 450; 
-    const START_Y = 350;
+    const YEAR_HEIGHT = 500; 
+    const START_Y = 400;
 
     async function init() {
-        // 强制保底：防止fetch死锁
+        // 5秒强制关闭加载页，防止白屏
         const safetyTimeout = setTimeout(() => {
             if (!DATA) {
-                showError("Request timed out. Please check if 'list.json' exists and is valid JSON.");
+                showError("Load Timeout: Check if list.json is missing or corrupted.");
                 hideLoading();
             }
         }, 5000);
 
         try {
             const response = await fetch('./list.json');
-            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-            DATA = await response.json();
-            console.log("Data loaded successfully:", DATA);
+            if (!response.ok) throw new Error(`HTTP Error ${response.status}: Failed to reach list.json`);
+            
+            const raw = await response.text();
+            try {
+                DATA = JSON.parse(raw);
+            } catch (e) {
+                throw new Error(`JSON Syntax Error: ${e.message}. Check for trailing commas or missing brackets.`);
+            }
+
+            if (!DATA.papers || DATA.papers.length === 0) {
+                throw new Error("Empty dataset: No papers found in JSON.");
+            }
+
+            // 数据预处理
+            DATA.papers.sort((a, b) => (a.year + a.month/13) - (b.year + b.month/13));
+            
+            const paperYears = DATA.papers.map(p => p.year).filter(y => !isNaN(y));
+            const categoryYears = DATA.years || [];
+            BASE_YEAR = Math.min(...paperYears, ...categoryYears);
+            const maxYear = Math.max(...paperYears, ...categoryYears);
+            
+            // 动态设置高度
+            const span = maxYear - BASE_YEAR + 1;
+            document.getElementById('main-container').style.minHeight = `${START_Y + (span * YEAR_HEIGHT) + 200}px`;
+
+            updateGroupBy('mod');
         } catch (e) {
-            console.error("Load failed:", e);
-            showError(`Critical Error: ${e.message}`);
+            console.error("Initialization Failed:", e);
+            showError(e.message);
         } finally {
             clearTimeout(safetyTimeout);
-            if (DATA && DATA.papers && DATA.papers.length > 0) {
-                // 自动对论文排序（从旧到新）
-                DATA.papers.sort((a, b) => (a.year + a.month/13) - (b.year + b.month/13));
-                
-                // 动态计算最早年份
-                const years = DATA.papers.map(p => p.year).filter(y => !isNaN(y));
-                BASE_YEAR = Math.min(...years);
-                const maxYear = Math.max(...years);
-                
-                // 动态拉伸容器高度
-                const totalYears = maxYear - BASE_YEAR + 1.5;
-                const container = document.getElementById('main-container');
-                container.style.minHeight = `${START_Y + totalYears * YEAR_HEIGHT}px`;
-                
-                updateGroupBy('mod');
-                hideLoading();
-            } else {
-                if (!DATA) showError("No data found in list.json");
-            }
+            hideLoading();
             if (window.lucide) lucide.createIcons();
             window.addEventListener('resize', () => renderTree());
         }
     }
 
     function showError(msg) {
-        const err = document.getElementById('error-msg');
+        const err = document.getElementById('error-display');
         err.style.display = 'block';
-        err.textContent = msg;
+        err.innerHTML = `<strong>Critical Error:</strong><br>${msg}`;
     }
 
     function hideLoading() {
@@ -172,8 +178,8 @@
     }
 
     function getY(year, month) {
-        // 核心公式：确保 2018 在顶部，2026 在底部
-        return START_Y + ((year - BASE_YEAR) + (month - 1) / 12) * YEAR_HEIGHT;
+        const m = month || 1;
+        return START_Y + ((year - BASE_YEAR) + (m - 1) / 12) * YEAR_HEIGHT;
     }
 
     function updateGroupBy(v) {
@@ -204,28 +210,27 @@
 
         const colWidth = (width - 240) / cats.length;
         const rootX = width / 2;
+        const lanePositions = cats.map((_, i) => 180 + (i * colWidth) + (colWidth / 2));
 
-        // 绘制时间轴刻度
-        const latestYear = Math.max(...DATA.papers.map(p => p.year));
-        for (let y_axis = BASE_YEAR; y_axis <= latestYear; y_axis++) {
-            const y_pos = getY(y_axis, 1);
+        // 1. 绘制时间轴刻度
+        const latestYear = Math.max(...DATA.papers.map(p => p.year), ...(DATA.years || []));
+        for (let yr = BASE_YEAR; yr <= latestYear; yr++) {
+            const y_pos = getY(yr, 1);
             const marker = document.createElement('div');
             marker.className = "year-marker";
             marker.style.top = `${y_pos}px`;
-            marker.innerHTML = `<span>${y_axis}</span>`;
+            marker.innerHTML = `<span>${yr}</span>`;
             timelineMarks.appendChild(marker);
         }
 
-        const lanePositions = cats.map((_, i) => 180 + (i * colWidth) + (colWidth / 2));
-
-        // 绘制枝干
+        // 2. 绘制泳道/枝干
         cats.forEach((cat, i) => {
             const laneX = lanePositions[i];
-            const color = `hsl(${220 + (i * 45)}, 70%, 60%)`;
+            const color = `hsl(${220 + (i * (360/cats.length))}, 70%, 60%)`;
             
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            const bottomY = container.scrollHeight || 3000;
-            path.setAttribute("d", `M ${rootX} 80 C ${rootX} 200, ${laneX} 150, ${laneX} 300 L ${laneX} ${bottomY}`);
+            const bottomY = container.scrollHeight || 5000;
+            path.setAttribute("d", `M ${rootX} 80 C ${rootX} 250, ${laneX} 150, ${laneX} 350 L ${laneX} ${bottomY}`);
             path.setAttribute("class", "branch-path");
             path.setAttribute("stroke", color);
             svg.appendChild(path);
@@ -233,24 +238,24 @@
             const header = document.createElement('div');
             header.className = "category-header";
             header.style.left = `${laneX}px`;
-            header.style.top = `280px`;
+            header.style.top = `330px`;
             header.style.transform = "translateX(-50%)";
             header.style.color = color;
             header.textContent = cat;
             nodesLayer.appendChild(header);
         });
 
-        // 绘制节点
+        // 3. 绘制节点
         DATA.papers.forEach(p => {
             const y = getY(p.year, p.month);
             const pVal = p[currentGroup];
-            // 支持单值或数组
             const targetIndices = Array.isArray(pVal) 
                 ? pVal.map(v => cats.indexOf(v)) 
                 : [cats.indexOf(pVal)];
 
-            // 多模态连线
             const validIndices = targetIndices.filter(i => i !== -1);
+            
+            // 多节点连线
             if (validIndices.length > 1) {
                 const xs = validIndices.map(i => lanePositions[i]);
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -267,7 +272,7 @@
                 node.className = "node-point";
                 node.style.left = `${lanePositions[idx]}px`;
                 node.style.top = `${y}px`;
-                node.style.backgroundColor = `hsl(${220 + (idx * 45)}, 70%, 60%)`;
+                node.style.backgroundColor = `hsl(${220 + (idx * (360/cats.length))}, 70%, 60%)`;
                 node.onclick = () => showDetail(p);
                 
                 const label = document.createElement('div');
@@ -285,16 +290,17 @@
     function showDetail(p) {
         document.getElementById('detail-modal').classList.remove('hidden');
         document.getElementById('modal-content').innerHTML = `
-            <div class="flex items-center gap-4 mb-8">
+            <div class="flex flex-wrap items-center gap-4 mb-8">
                 <span class="bg-indigo-500 text-white px-4 py-1.5 rounded-xl text-xs font-black tracking-widest">${p.year}.${p.month}</span>
-                <span class="text-slate-700">/</span>
-                <span class="text-indigo-400 font-black uppercase text-xs tracking-widest">${p.task}</span>
+                <span class="text-slate-800 text-xl">/</span>
+                <span class="bg-slate-800 text-indigo-400 px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest">${p.base}</span>
+                <span class="text-indigo-300 font-black uppercase text-xs tracking-widest ml-auto">${p.task}</span>
             </div>
             <h2 class="text-5xl font-black text-white mb-8 tracking-tighter leading-tight">${p.name}</h2>
-            <p class="text-xl text-slate-400 mb-12 leading-relaxed font-light">${p.desc}</p>
+            <p class="text-xl text-slate-400 mb-12 leading-relaxed font-light">${p.desc || "No description available."}</p>
             <div class="flex gap-4">
-                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-5 rounded-3xl text-center font-black text-lg hover:bg-indigo-500 hover:text-white transition-all shadow-2xl">Read Arxiv Paper</a>
-                <button onclick="closeModal()" class="px-10 border border-slate-800 text-slate-500 py-5 rounded-3xl font-bold">Close</button>
+                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-5 rounded-3xl text-center font-black text-lg hover:bg-indigo-600 hover:text-white transition-all shadow-2xl">Arxiv Paper</a>
+                <button onclick="closeModal()" class="px-10 border border-slate-800 text-slate-500 py-5 rounded-3xl font-bold hover:text-white transition-colors">Close</button>
             </div>
         `;
         if (window.lucide) lucide.createIcons();
