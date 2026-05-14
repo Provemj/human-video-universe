@@ -9,7 +9,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050810; color: #e2e8f0; }
-        /* 关键：确保容器能滚动的布局 */
         .timeline-container { 
             position: relative; 
             background: radial-gradient(circle at top, #111827 0%, #050810 80%); 
@@ -17,7 +16,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             margin-top: 2rem;
             width: 100%;
-            overflow: visible; /* 允许内部元素撑开 */
+            overflow: visible;
         }
         .year-marker { 
             position: absolute; 
@@ -33,13 +32,10 @@
             z-index: 10;
         }
         .year-marker::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(to right, #4f46e5, transparent); }
-        
         .branch-path { fill: none; stroke-width: 3; stroke-linecap: round; opacity: 0.1; }
         .convergence-line { fill: none; stroke-width: 1.5; stroke-dasharray: 6 4; opacity: 0.4; stroke: #6366f1; }
-        
         .node-point { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #050810; position: absolute; transform: translate(-50%, -50%); z-index: 50; cursor: pointer; transition: all 0.3s; }
         .node-point:hover { transform: translate(-50%, -50%) scale(2); box-shadow: 0 0 30px currentColor; }
-        
         .node-label { 
             position: absolute; 
             white-space: nowrap; 
@@ -56,7 +52,6 @@
             pointer-events: none;
         }
         .node-group:hover .node-label { opacity: 1; transform: translate(20px, -50%); }
-        
         .category-header { 
             position: absolute; 
             text-align: center; 
@@ -70,7 +65,8 @@
             border: 1px solid rgba(255,255,255,0.1);
             z-index: 60;
         }
-        #loading { position: fixed; inset: 0; background: #050810; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        #loading { position: fixed; inset: 0; background: #050810; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.5s; }
+        #error-msg { color: #ef4444; margin-top: 1rem; font-size: 0.875rem; max-width: 400px; text-align: center; display: none; }
     </style>
 </head>
 <body>
@@ -78,6 +74,7 @@
 <div id="loading">
     <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
     <span class="font-black tracking-widest uppercase">Syncing Universe Data...</span>
+    <div id="error-msg"></div>
 </div>
 
 <div id="app" class="max-w-[1600px] mx-auto p-6 md:p-12 opacity-0 transition-opacity duration-1000">
@@ -87,7 +84,7 @@
                 Human Video <span class="text-indigo-500">Universe</span>
             </h1>
             <p class="text-slate-400 max-w-2xl text-lg leading-relaxed border-l-4 border-indigo-500 pl-6">
-                Interactive Living Survey: Navigating the technical evolution from 2D animation to LLM-based motion planning.
+                Interactive Living Survey: Navigating technical evolution from 2D to 3D motion planning.
             </p>
         </div>
         <div class="bg-slate-900/50 p-3 rounded-3xl border border-white/5 flex gap-2">
@@ -104,7 +101,6 @@
     </div>
 </div>
 
-<!-- Modal Same as before -->
 <div id="detail-modal" class="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl hidden z-[100] flex items-center justify-center p-6">
     <div class="bg-slate-900 border border-white/10 rounded-[3rem] max-w-3xl w-full p-12 relative shadow-2xl">
         <button onclick="closeModal()" class="absolute top-10 right-10 text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-10 h-10"></i></button>
@@ -116,34 +112,67 @@
     let DATA = null;
     let currentGroup = 'mod';
     let BASE_YEAR = 2018; 
-    const YEAR_HEIGHT = 500; // 增加间距
+    const YEAR_HEIGHT = 450; 
     const START_Y = 350;
 
     async function init() {
+        // 强制保底：防止fetch死锁
+        const safetyTimeout = setTimeout(() => {
+            if (!DATA) {
+                showError("Request timed out. Please check if 'list.json' exists and is valid JSON.");
+                hideLoading();
+            }
+        }, 5000);
+
         try {
             const response = await fetch('./list.json');
-            if (!response.ok) throw new Error("File not found");
+            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
             DATA = await response.json();
+            console.log("Data loaded successfully:", DATA);
         } catch (e) {
-            console.error("Load failed, using default data.", e);
-            // 这里可以放一个小的 Fallback 数据用于测试
+            console.error("Load failed:", e);
+            showError(`Critical Error: ${e.message}`);
         } finally {
-            if (DATA) {
-                // 1. 找到数据中最早的年份作为起始点
-                BASE_YEAR = Math.min(...DATA.papers.map(p => p.year));
-                // 2. 自动设置容器总高度
-                const totalYears = Math.max(...DATA.papers.map(p => p.year)) - BASE_YEAR + 1.5;
-                document.getElementById('main-container').style.minHeight = `${START_Y + totalYears * YEAR_HEIGHT}px`;
+            clearTimeout(safetyTimeout);
+            if (DATA && DATA.papers && DATA.papers.length > 0) {
+                // 自动对论文排序（从旧到新）
+                DATA.papers.sort((a, b) => (a.year + a.month/13) - (b.year + b.month/13));
+                
+                // 动态计算最早年份
+                const years = DATA.papers.map(p => p.year).filter(y => !isNaN(y));
+                BASE_YEAR = Math.min(...years);
+                const maxYear = Math.max(...years);
+                
+                // 动态拉伸容器高度
+                const totalYears = maxYear - BASE_YEAR + 1.5;
+                const container = document.getElementById('main-container');
+                container.style.minHeight = `${START_Y + totalYears * YEAR_HEIGHT}px`;
+                
+                updateGroupBy('mod');
+                hideLoading();
+            } else {
+                if (!DATA) showError("No data found in list.json");
             }
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('app').classList.remove('opacity-0');
-            updateGroupBy('mod');
             if (window.lucide) lucide.createIcons();
             window.addEventListener('resize', () => renderTree());
         }
     }
 
+    function showError(msg) {
+        const err = document.getElementById('error-msg');
+        err.style.display = 'block';
+        err.textContent = msg;
+    }
+
+    function hideLoading() {
+        const loader = document.getElementById('loading');
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 500);
+        document.getElementById('app').classList.remove('opacity-0');
+    }
+
     function getY(year, month) {
+        // 核心公式：确保 2018 在顶部，2026 在底部
         return START_Y + ((year - BASE_YEAR) + (month - 1) / 12) * YEAR_HEIGHT;
     }
 
@@ -153,7 +182,10 @@
             b.classList.remove('bg-indigo-600', 'text-white', 'shadow-xl');
             b.classList.add('text-slate-500', 'hover:bg-slate-800');
         });
-        document.getElementById(`btn-${v}`).classList.add('bg-indigo-600', 'text-white', 'shadow-xl shadow-indigo-500/20');
+        const targetBtn = document.getElementById(`btn-${v}`);
+        if (targetBtn) {
+            targetBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-xl shadow-indigo-500/20');
+        }
         renderTree();
     }
 
@@ -167,7 +199,9 @@
         svg.innerHTML = ''; nodesLayer.innerHTML = ''; timelineMarks.innerHTML = '';
 
         const width = container.offsetWidth;
-        const cats = DATA.categories[currentGroup];
+        const cats = DATA.categories[currentGroup] || [];
+        if (cats.length === 0) return;
+
         const colWidth = (width - 240) / cats.length;
         const rootX = width / 2;
 
@@ -187,10 +221,10 @@
         // 绘制枝干
         cats.forEach((cat, i) => {
             const laneX = lanePositions[i];
-            const color = `hsl(${220 + (i * 40)}, 70%, 60%)`;
+            const color = `hsl(${220 + (i * 45)}, 70%, 60%)`;
             
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            const bottomY = container.offsetHeight;
+            const bottomY = container.scrollHeight || 3000;
             path.setAttribute("d", `M ${rootX} 80 C ${rootX} 200, ${laneX} 150, ${laneX} 300 L ${laneX} ${bottomY}`);
             path.setAttribute("class", "branch-path");
             path.setAttribute("stroke", color);
@@ -210,21 +244,22 @@
         DATA.papers.forEach(p => {
             const y = getY(p.year, p.month);
             const pVal = p[currentGroup];
-            const targetIndices = Array.isArray(pVal) ? pVal.map(v => cats.indexOf(v)) : [cats.indexOf(pVal)];
+            // 支持单值或数组
+            const targetIndices = Array.isArray(pVal) 
+                ? pVal.map(v => cats.indexOf(v)) 
+                : [cats.indexOf(pVal)];
 
             // 多模态连线
-            if (targetIndices.length > 1) {
-                const xs = targetIndices.filter(i => i !== -1).map(i => lanePositions[i]);
-                if (xs.length > 1) {
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    line.setAttribute("d", `M ${Math.min(...xs)} ${y} L ${Math.max(...xs)} ${y}`);
-                    line.setAttribute("class", "convergence-line");
-                    svg.appendChild(line);
-                }
+            const validIndices = targetIndices.filter(i => i !== -1);
+            if (validIndices.length > 1) {
+                const xs = validIndices.map(i => lanePositions[i]);
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                line.setAttribute("d", `M ${Math.min(...xs)} ${y} L ${Math.max(...xs)} ${y}`);
+                line.setAttribute("class", "convergence-line");
+                svg.appendChild(line);
             }
 
-            targetIndices.forEach(idx => {
-                if (idx === -1) return;
+            validIndices.forEach(idx => {
                 const group = document.createElement('div');
                 group.className = "node-group";
                 
@@ -232,7 +267,7 @@
                 node.className = "node-point";
                 node.style.left = `${lanePositions[idx]}px`;
                 node.style.top = `${y}px`;
-                node.style.backgroundColor = `hsl(${220 + (idx * 40)}, 70%, 60%)`;
+                node.style.backgroundColor = `hsl(${220 + (idx * 45)}, 70%, 60%)`;
                 node.onclick = () => showDetail(p);
                 
                 const label = document.createElement('div');
@@ -255,11 +290,11 @@
                 <span class="text-slate-700">/</span>
                 <span class="text-indigo-400 font-black uppercase text-xs tracking-widest">${p.task}</span>
             </div>
-            <h2 class="text-6xl font-black text-white mb-8 tracking-tighter leading-none">${p.name}</h2>
-            <p class="text-2xl text-slate-400 mb-12 leading-relaxed font-light">${p.desc}</p>
+            <h2 class="text-5xl font-black text-white mb-8 tracking-tighter leading-tight">${p.name}</h2>
+            <p class="text-xl text-slate-400 mb-12 leading-relaxed font-light">${p.desc}</p>
             <div class="flex gap-4">
-                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-6 rounded-3xl text-center font-black text-xl hover:bg-indigo-500 hover:text-white transition-all shadow-2xl">Read Arxiv Paper</a>
-                <button onclick="closeModal()" class="px-12 border border-slate-800 text-slate-500 py-6 rounded-3xl font-bold">Close</button>
+                <a href="${p.link}" target="_blank" class="flex-1 bg-white text-black py-5 rounded-3xl text-center font-black text-lg hover:bg-indigo-500 hover:text-white transition-all shadow-2xl">Read Arxiv Paper</a>
+                <button onclick="closeModal()" class="px-10 border border-slate-800 text-slate-500 py-5 rounded-3xl font-bold">Close</button>
             </div>
         `;
         if (window.lucide) lucide.createIcons();
