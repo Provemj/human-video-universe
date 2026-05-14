@@ -85,106 +85,63 @@
 </div>
 
 <script>
-    const DATA = {
-        "papers": [
-            { "id": 1, "name": "Improving Human Image Animation", "year": 2026, "month": 5, "mod": ["Text"], "task": "Animation", "base": "DiT", "desc": "Semantic Representation Alignment for high-fidelity animation.", "link": "https://arxiv.org/abs/2605.10523", "code": "https://github.com/example/repo1" },
-            { "id": 2, "name": "SocialDirector", "year": 2026, "month": 5, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Training-Free Social Interaction Control.", "link": "https://arxiv.org/abs/2605.10079", "code": "https://github.com/example/repo2" },
-            { "id": 3, "name": "SDTalk", "year": 2026, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "GAN", "desc": "Structured Facial Priors for Gaussian Talking Head.", "link": "https://arxiv.org/abs/2605.09956" },
-            { "id": 4, "name": "Unison", "year": 2026, "month": 5, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Harmonizing Motion, Speech, and Sound.", "link": "https://arxiv.org/abs/2605.08729" },
-            { "id": 5, "name": "MoCoTalk", "year": 2026, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Multi-Conditional Diffusion with Adaptive Router.", "link": "https://arxiv.org/abs/2605.08050" },
-            { "id": 6, "name": "Implicit Preference Alignment", "year": 2026, "month": 5, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Pose-Guided Dance Video Generation.", "link": "https://arxiv.org/abs/2605.07545" },
-            { "id": 7, "name": "AudioFace", "year": 2026, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "LLM", "desc": "Language-Assisted Speech-Driven Facial Animation.", "link": "https://arxiv.org/abs/2605.07478" },
-            { "id": 8, "name": "SuperFace", "year": 2026, "month": 5, "mod": ["Vision"], "task": "Talking Head", "base": "UNet", "desc": "Preference-Aligned Facial Expression Estimation.", "link": "https://arxiv.org/abs/2605.06179" },
-            { "id": 9, "name": "FaithfulFaces", "year": 2026, "month": 5, "mod": ["Text"], "task": "Talking Head", "base": "DiT", "desc": "Pose-Faithful Facial Identity Preservation.", "link": "https://arxiv.org/abs/2605.04702" },
-            { "id": 10, "name": "TripVVT", "year": 2026, "month": 5, "mod": ["Vision"], "task": "Virtual Try-on", "base": "UNet", "desc": "Large-Scale Triplet Dataset for Virtual Try-On.", "link": "https://arxiv.org/abs/2604.27958" },
-            { "id": 11, "name": "Mutual Forcing", "year": 2026, "month": 4, "mod": ["Text"], "task": "General", "base": "Autoregressive", "desc": "Dual-Mode Self-Evolution for Fast Generation.", "link": "https://arxiv.org/abs/2604.25819" },
-            { "id": 12, "name": "Hallo-Live", "year": 2026, "month": 4, "mod": ["Text", "Audio"], "task": "Talking Head", "base": "Flow Matching", "desc": "Real-Time Streaming Avatar Generation.", "link": "https://arxiv.org/abs/2604.23632" },
-            { "id": 13, "name": "Talker-T2AV", "year": 2026, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "Joint Talking Audio-Video Generation.", "link": "https://arxiv.org/abs/2604.23586" },
-            { "id": 14, "name": "OmniHuman", "year": 2026, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "UNet", "desc": "Dataset and Benchmark for Human-Centric Video.", "link": "https://arxiv.org/abs/2604.18326" },
-            { "id": 15, "name": "TurboTalk", "year": 2026, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "Flow Matching", "desc": "One-Step Audio-Driven Talking Avatar.", "link": "https://arxiv.org/abs/2604.14580" },
-            { "id": 16, "name": "HumANDiff", "year": 2026, "month": 4, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Articulated Noise Diffusion for Consistency.", "link": "https://arxiv.org/abs/2604.05961" },
-            { "id": 17, "name": "AvatarForcing", "year": 2026, "month": 3, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "One-Step Streaming Talking Avatars.", "link": "https://arxiv.org/abs/2603.14331" },
-            { "id": 18, "name": "Kling-MotionControl", "year": 2026, "month": 3, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Technical report for Kling motion control.", "link": "https://arxiv.org/abs/2603.03160" },
-            { "id": 19, "name": "LiveTalk", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Real-time multimodal interactive video diffusion.", "link": "https://arxiv.org/abs/2512.23576" },
-            { "id": 20, "name": "ByteLoom", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Consistent human-object interactions via curriculum learning.", "link": "https://arxiv.org/abs/2512.22854" },
-            { "id": 21, "name": "MoFu", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Scale-aware modulation for multi-subject video.", "link": "https://arxiv.org/abs/2512.22310" },
-            { "id": 22, "name": "StreamAvatar", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Streaming diffusion for real-time interactive avatars.", "link": "https://arxiv.org/abs/2512.22065" },
-            { "id": 23, "name": "Knot Forcing", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "Real-time infinite interactive portrait animation.", "link": "https://arxiv.org/abs/2512.21734" },
-            { "id": 24, "name": "SyncAnyone", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Implicit disentanglement for lip-syncing in the wild.", "link": "https://arxiv.org/abs/2512.21736" },
-            { "id": 25, "name": "TAVID", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Text-driven audio-visual interactive dialogue.", "link": "https://arxiv.org/abs/2512.20296" },
-            { "id": 26, "name": "ActAvatar", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Temporally-aware precise action control.", "link": "https://arxiv.org/abs/2512.19546" },
-            { "id": 27, "name": "EchoMotion", "year": 2025, "month": 12, "mod": ["Text"], "task": "Animation", "base": "DiT", "desc": "Unified video and motion via dual-modality DiT.", "link": "https://arxiv.org/abs/2512.18814" },
-            { "id": 28, "name": "MACE-Dance", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Animation", "base": "Diffusion", "desc": "Motion-appearance cascaded experts for dance.", "link": "https://arxiv.org/abs/2512.18181" },
-            { "id": 29, "name": "FlashPortrait", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Talking Head", "base": "GAN", "desc": "6x faster infinite portrait animation.", "link": "https://arxiv.org/abs/2512.16900" },
-            { "id": 30, "name": "DeX-Portrait", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Talking Head", "base": "Diffusion", "desc": "Disentangled and expressive portrait animation.", "link": "https://arxiv.org/abs/2512.15524" },
-            { "id": 31, "name": "TalkVerse", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Democratizing minute-long audio-driven video.", "link": "https://arxiv.org/abs/2512.14938" },
-            { "id": 32, "name": "Soul", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "High-fidelity long-term multimodal animation.", "link": "https://arxiv.org/abs/2512.13495" },
-            { "id": 33, "name": "STARCaster", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "View-aware talking portraits via video diffusion.", "link": "https://arxiv.org/abs/2512.13247" },
-            { "id": 34, "name": "UniMo", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "Autoregressive", "desc": "Unifying 2D video and 3D human motion.", "link": "https://arxiv.org/abs/2512.03918" },
-            { "id": 35, "name": "IMTalker", "year": 2025, "month": 11, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Efficient talking face via implicit motion transfer.", "link": "https://arxiv.org/abs/2511.22167" },
-            { "id": 36, "name": "SteadyDancer", "year": 2025, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Harmonized animation with first-frame preservation.", "link": "https://arxiv.org/abs/2511.19320" },
-            { "id": 37, "name": "ID-Composer", "year": 2025, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Multi-subject synthesis with identity preservation.", "link": "https://arxiv.org/abs/2511.00511" },
-            { "id": 38, "name": "Lookahead Anchoring", "year": 2025, "month": 10, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Preserving character identity in audio animation.", "link": "https://arxiv.org/abs/2510.23581", "code": "https://github.com/j0seo/lookahead-anchoring"},
-            { "id": 39, "name": "VividAnimator", "year": 2025, "month": 10, "mod": ["Audio", "Motion"], "task": "Animation", "base": "Diffusion", "desc": "End-to-end audio and pose-driven half-body animation.", "link": "https://arxiv.org/abs/2510.10269" }
-        ],
-        "categories": {
-            "mod": ["Vision", "Text", "Audio", "Motion"],
-            "task": ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "Motion Planning", "General"],
-            "base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive", "Diffusion", "LLM"]
-        }
-    };
-
+    let DATA = null;
     let currentGroup = 'mod';
-    let Y_MAP = {}; 
-    const MIN_MONTH_HEIGHT = 75; 
-    const NODE_GAP = 30; 
-    const START_Y = 400; // Increased to provide breathing room from the root badge
-
-    function init() {
+    let BASE_YEAR = 2018; 
+    const YEAR_HEIGHT = 450; 
+    const START_Y = 400;
+    
+    async function init() {
         try {
-            // 1. Sort all papers by date
-            DATA.papers.sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month));
+            // Fetch the external JSON file
+            const response = await fetch('list.json');
             
-            // 2. Identify the dynamic start and end
-            const firstP = DATA.papers[0];
-            const lastP = DATA.papers[DATA.papers.length - 1];
-            const startYear = firstP.year;
-            const endYear = lastP.year;
-
-            let currentY = START_Y;
-            Y_MAP = {};
-
-            for (let yr = startYear; yr <= endYear; yr++) {
-                let moStart = (yr === startYear) ? firstP.month : 1;
-                let moEnd = (yr === endYear) ? lastP.month : 12;
-
-                for (let mo = moStart; mo <= moEnd; mo++) {
-                    const key = `${yr}-${mo}`;
-                    Y_MAP[key] = currentY;
-                    
-                    const papersInMonth = DATA.papers.filter(p => p.year === yr && p.month === mo);
-                    const count = papersInMonth.length;
-                    papersInMonth.forEach((p, i) => p.stackIndex = i);
-
-                    const monthContentHeight = count > 0 ? (count * NODE_GAP) + 40 : 0;
-                    currentY += Math.max(MIN_MONTH_HEIGHT, monthContentHeight);
-                }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            document.getElementById('main-container').style.minHeight = `${currentY + 300}px`;
-            document.getElementById('loading').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('app').classList.remove('opacity-0');
-            }, 500);
             
+            DATA = await response.json();
+    
+            DATA.papers.sort((a, b) => (a.year + a.month/13) - (b.year + b.month/13));
+            
+            const validYears = DATA.papers.map(p => parseInt(p.year)).filter(y => !isNaN(y));
+            BASE_YEAR = Math.min(...validYears, 2025);
+            const maxYear = Math.max(...validYears, 2026);
+            const span = (maxYear - BASE_YEAR) + 1;
+            
+            const container = document.getElementById('main-container');
+            if (container) {
+                container.style.minHeight = `${START_Y + (span * YEAR_HEIGHT) + 400}px`;
+            }
+    
             updateGroupBy('mod');
+            
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.opacity = '0';
+                setTimeout(() => loading.classList.add('hidden'), 500);
+            }
+            const app = document.getElementById('app');
+            if (app) app.classList.remove('opacity-0');
+    
             if (window.lucide) lucide.createIcons();
             window.addEventListener('resize', () => renderTree());
-        } catch (e) {
-            console.error("Init Error:", e);
+        } catch (error) {
+            console.error("Initialization Error:", error);
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.innerHTML = `
+                    <div class="text-red-500 bg-red-500/10 p-10 rounded-[3rem] border border-red-500/20 text-center max-w-md mx-6">
+                        <p class="font-black text-2xl mb-4 uppercase">Data Load Failure</p>
+                        <p class="text-sm opacity-70 mb-8">${error.message}</p>
+                        <button onclick="location.reload()" class="w-full py-4 bg-red-500 text-white rounded-2xl font-bold">RETRY</button>
+                    </div>
+                `;
+            }
         }
     }
+    
+    window.addEventListener('DOMContentLoaded', init);
 
     function getY(year, month, si = 0) {
         const key = `${year}-${month}`;
