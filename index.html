@@ -9,11 +9,11 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050810; color: #e2e8f0; overflow-x: hidden; }
-        .timeline-container { position: relative; background: radial-gradient(circle at top, #111827 0%, #050810 80%); border-radius: 3rem; border: 1px solid rgba(255, 255, 255, 0.03); margin-top: 2rem; min-height: 1400px; }
+        .timeline-container { position: relative; background: radial-gradient(circle at top, #111827 0%, #050810 80%); border-radius: 3rem; border: 1px solid rgba(255, 255, 255, 0.03); margin-top: 2rem; min-height: 1500px; }
         .year-marker { position: absolute; left: 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 10px; width: 100px; }
         .year-marker::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(to right, #1e293b, transparent); }
         .branch-path { fill: none; stroke-width: 2; stroke-linecap: round; opacity: 0.15; transition: opacity 0.4s; }
-        .convergence-line { fill: none; stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0; transition: opacity 0.3s ease; }
+        .convergence-line { fill: none; stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.5; transition: opacity 0.3s ease; }
         .node-point { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #050810; position: absolute; transform: translate(-50%, -50%); z-index: 50; cursor: pointer; transition: all 0.3s; }
         .node-point:hover { transform: translate(-50%, -50%) scale(2.2); box-shadow: 0 0 30px currentColor; }
         .node-label { position: absolute; white-space: nowrap; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #fff; background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 6px; pointer-events: none; opacity: 0; transform: translate(15px, -50%); transition: opacity 0.2s, transform 0.2s; border: 1px solid rgba(255,255,255,0.1); }
@@ -27,6 +27,7 @@
 <div id="loading">
     <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
     <span id="loading-text">INITIALIZING UNIVERSE...</span>
+    <p id="debug-info" class="text-slate-600 text-[10px] mt-4 font-mono"></p>
 </div>
 
 <div id="app" class="max-w-[1600px] mx-auto p-6 md:p-10 opacity-0 transition-opacity duration-700">
@@ -57,17 +58,10 @@
 </div>
 
 <script>
-    // This is a copy of your list.json. The app will use this if list.json cannot be fetched (e.g., local file browsing).
     const LOCAL_FALLBACK_DATA = {
         "papers": [
             { "id": 1, "name": "Sora", "year": 2024, "month": 2, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Large-scale diffusion transformer for high-fidelity video generation.", "link": "#" },
-            { "id": 2, "name": "AnimateAnyone", "year": 2023, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Reference-Net based high-fidelity human animation.", "link": "#" },
-            { "id": 3, "name": "MuseTalk", "year": 2024, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "UNet", "desc": "Real-time lip-sync with localized facial refinement.", "link": "#" },
-            { "id": 4, "name": "V-Express", "year": 2024, "month": 6, "mod": ["Audio", "Motion"], "task": "Talking Head", "base": "UNet", "desc": "A hybrid model balancing audio-sync and pose control.", "link": "#" },
-            { "id": 5, "name": "Champ", "year": 2024, "month": 3, "mod": ["Motion"], "task": "Animation", "base": "UNet", "desc": "3D skeleton-guided motion synthesis.", "link": "#" },
-            { "id": 16, "name": "V-Flow", "year": 2025, "month": 2, "mod": ["Text", "Motion", "Vision"], "task": "General", "base": "Flow Matching", "desc": "Next-gen multi-condition flow matching system.", "link": "#" },
-            { "id": 17, "name": "LivePortrait", "year": 2024, "month": 10, "mod": ["Vision"], "task": "Talking Head", "base": "GAN", "desc": "Stitch-capable portrait animation.", "link": "#" },
-            { "id": 18, "name": "EchoMimic", "year": 2024, "month": 7, "mod": ["Audio", "Motion"], "task": "Animation", "base": "UNet", "desc": "Synchronized facial and body motion from dual cues.", "link": "#" }
+            { "id": 2, "name": "AnimateAnyone", "year": 2023, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Reference-Net based high-fidelity human animation.", "link": "#" }
         ],
         "categories": {
             "mod": ["Vision", "Text", "Audio", "Motion"],
@@ -84,33 +78,47 @@
     const BASE_YEAR = 2023;
 
     async function init() {
-        const loadingText = document.getElementById('loading-text');
+        const debug = document.getElementById('debug-info');
         try {
-            loadingText.innerText = "FETCHING EXTERNAL JSON...";
+            debug.innerText = "Attempting to fetch list.json...";
             const response = await fetch('./list.json');
             
-            if (!response.ok) throw new Error("File not found");
+            if (!response.ok) {
+                console.error("Fetch failed with status:", response.status);
+                throw new Error("HTTP ERROR: " + response.status);
+            }
             
             DATA = await response.json();
-            console.log("Loaded from list.json");
+            debug.innerText = "Successfully loaded JSON data.";
         } catch (error) {
-            console.warn("CORS/Fetch error, using Local Fallback Data. Reason:", error.message);
+            console.error("Loading Error:", error);
+            debug.innerText = "Error: " + error.message + ". Using built-in fallback.";
             DATA = LOCAL_FALLBACK_DATA;
-            loadingText.innerText = "LOCAL MODE ACTIVE";
         } finally {
-            // Hide loader and render anyway
+            // Guarantee: This part runs no matter what
             setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('loading').style.display = 'none';
                 document.getElementById('app').classList.remove('opacity-0');
                 updateGroupBy('mod');
                 if (window.lucide) lucide.createIcons();
                 window.addEventListener('resize', () => renderTree());
-            }, 500);
+            }, 1000);
         }
     }
 
-    // ... existing renderTree, updateGroupBy, and other functions ...
+    function getYCoordinate(year, month) {
         return START_Y + ((year - BASE_YEAR) + (month - 1) / 12) * YEAR_HEIGHT;
+    }
+
+    function updateGroupBy(val) {
+        currentGroup = val;
+        document.querySelectorAll('button[id^="btn-"]').forEach(b => {
+            b.classList.remove('bg-indigo-600', 'text-white');
+            b.classList.add('bg-slate-800', 'text-slate-400');
+        });
+        const active = document.getElementById(`btn-${val}`);
+        if(active) active.classList.add('bg-indigo-600', 'text-white');
+        renderTree();
     }
 
     function renderTree() {
@@ -164,21 +172,21 @@
             const targetIndices = Array.isArray(pVal) ? pVal.map(v => cats.indexOf(v)) : [cats.indexOf(pVal)];
 
             if (targetIndices.length > 1) {
-                const xs = targetIndices.map(i => lanePositions[i]);
-                const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                line.setAttribute("d", `M ${Math.min(...xs)} ${y} L ${Math.max(...xs)} ${y}`);
-                line.setAttribute("class", "convergence-line");
-                line.setAttribute("stroke", "#4f46e5");
-                line.dataset.pid = p.id;
-                svg.appendChild(line);
+                const xs = targetIndices.filter(i => i !== -1).map(i => lanePositions[i]);
+                if (xs.length > 1) {
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    line.setAttribute("d", `M ${Math.min(...xs)} ${y} L ${Math.max(...xs)} ${y}`);
+                    line.setAttribute("class", "convergence-line");
+                    line.setAttribute("stroke", "#4f46e5");
+                    line.dataset.pid = p.id;
+                    svg.appendChild(line);
+                }
             }
 
             targetIndices.forEach(idx => {
                 if (idx === -1) return;
                 const group = document.createElement('div');
                 group.className = "node-group";
-                group.onmouseenter = () => document.querySelectorAll(`.convergence-line[data-pid="${p.id}"]`).forEach(l => l.style.opacity = "0.8");
-                group.onmouseleave = () => document.querySelectorAll(`.convergence-line[data-pid="${p.id}"]`).forEach(l => l.style.opacity = "0");
 
                 const node = document.createElement('div');
                 node.className = "node-point";
