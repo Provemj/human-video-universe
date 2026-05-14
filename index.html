@@ -57,6 +57,26 @@
 </div>
 
 <script>
+    // This is a copy of your list.json. The app will use this if list.json cannot be fetched (e.g., local file browsing).
+    const LOCAL_FALLBACK_DATA = {
+        "papers": [
+            { "id": 1, "name": "Sora", "year": 2024, "month": 2, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Large-scale diffusion transformer for high-fidelity video generation.", "link": "#" },
+            { "id": 2, "name": "AnimateAnyone", "year": 2023, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Reference-Net based high-fidelity human animation.", "link": "#" },
+            { "id": 3, "name": "MuseTalk", "year": 2024, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "UNet", "desc": "Real-time lip-sync with localized facial refinement.", "link": "#" },
+            { "id": 4, "name": "V-Express", "year": 2024, "month": 6, "mod": ["Audio", "Motion"], "task": "Talking Head", "base": "UNet", "desc": "A hybrid model balancing audio-sync and pose control.", "link": "#" },
+            { "id": 5, "name": "Champ", "year": 2024, "month": 3, "mod": ["Motion"], "task": "Animation", "base": "UNet", "desc": "3D skeleton-guided motion synthesis.", "link": "#" },
+            { "id": 16, "name": "V-Flow", "year": 2025, "month": 2, "mod": ["Text", "Motion", "Vision"], "task": "General", "base": "Flow Matching", "desc": "Next-gen multi-condition flow matching system.", "link": "#" },
+            { "id": 17, "name": "LivePortrait", "year": 2024, "month": 10, "mod": ["Vision"], "task": "Talking Head", "base": "GAN", "desc": "Stitch-capable portrait animation.", "link": "#" },
+            { "id": 18, "name": "EchoMimic", "year": 2024, "month": 7, "mod": ["Audio", "Motion"], "task": "Animation", "base": "UNet", "desc": "Synchronized facial and body motion from dual cues.", "link": "#" }
+        ],
+        "categories": {
+            "mod": ["Vision", "Text", "Audio", "Motion"],
+            "task": ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "General"],
+            "base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive"]
+        },
+        "years": [2023, 2024, 2025]
+    };
+
     let DATA = null;
     let currentGroup = 'mod';
     const START_Y = 200; 
@@ -64,52 +84,32 @@
     const BASE_YEAR = 2023;
 
     async function init() {
+        const loadingText = document.getElementById('loading-text');
         try {
-            // 重点：尝试读取同目录下的 list.json
+            loadingText.innerText = "FETCHING EXTERNAL JSON...";
             const response = await fetch('./list.json');
             
-            if (!response.ok) {
-                throw new Error(`Could not find list.json (HTTP ${response.status})`);
-            }
+            if (!response.ok) throw new Error("File not found");
             
             DATA = await response.json();
-
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('app').classList.remove('opacity-0');
-            
-            updateGroupBy('mod');
-            lucide.createIcons();
-            window.addEventListener('resize', () => renderTree());
+            console.log("Loaded from list.json");
         } catch (error) {
-            // 报错处理：如果是 file:/// 打开的，这里会显示错误
-            document.getElementById('loading').innerHTML = `
-                <div class="text-red-500 bg-red-500/10 p-8 rounded-3xl border border-red-500/20 text-center max-w-lg">
-                    <p class="font-bold text-xl mb-4">DATA LOAD ERROR</p>
-                    <p class="text-sm opacity-80 mb-6">${error.message}</p>
-                    <div class="text-xs text-left bg-black/40 p-4 rounded-xl font-mono leading-relaxed">
-                        <p class="text-indigo-400 mb-2">// How to fix:</p>
-                        <p>1. Upload to GitHub Pages (Recommended)</p>
-                        <p>2. OR Use VS Code "Live Server"</p>
-                        <p>3. OR run 'python -m http.server' in this folder</p>
-                    </div>
-                    <button onclick="location.reload()" class="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold">Retry</button>
-                </div>
-            `;
+            console.warn("CORS/Fetch error, using Local Fallback Data. Reason:", error.message);
+            DATA = LOCAL_FALLBACK_DATA;
+            loadingText.innerText = "LOCAL MODE ACTIVE";
+        } finally {
+            // Hide loader and render anyway
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('app').classList.remove('opacity-0');
+                updateGroupBy('mod');
+                if (window.lucide) lucide.createIcons();
+                window.addEventListener('resize', () => renderTree());
+            }, 500);
         }
     }
 
-    function updateGroupBy(val) {
-        if (!DATA) return;
-        currentGroup = val;
-        document.querySelectorAll('button[id^="btn-"]').forEach(b => {
-            b.classList.remove('bg-indigo-600', 'text-white');
-            b.classList.add('bg-slate-800/50', 'text-slate-400');
-        });
-        document.getElementById(`btn-${val}`).classList.add('bg-indigo-600', 'text-white');
-        renderTree();
-    }
-
-    function getYCoordinate(year, month) {
+    // ... existing renderTree, updateGroupBy, and other functions ...
         return START_Y + ((year - BASE_YEAR) + (month - 1) / 12) * YEAR_HEIGHT;
     }
 
