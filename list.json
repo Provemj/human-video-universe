@@ -91,7 +91,7 @@
 { "id": 89, "name": "ESGaussianFace", "year": 2026, "month": 1, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Stylized 3D GS Animation. SJTU & MSRA.", "link": "https://arxiv.org/abs/2601.01847" },
 { "id": 90, "name": "DreamID-V", "year": 2026, "month": 1, "mod": ["Vision"], "task": "Talking Head", "base": "DiT", "desc": "Face Swapping via DiT. Tsinghua & Bytedance.", "link": "https://arxiv.org/abs/2601.01425" },
 { "id": 91, "name": "Slot-ID", "year": 2026, "month": 1, "mod": ["Text"], "task": "Talking Head", "base": "Diffusion", "desc": "Slot-Based Identity Encoding. ZJU & UCL.", "link": "https://arxiv.org/abs/2601.01352" },
-{ "id": 92, "name": "Avatar Forcing", "year": 2026, "month": 1, "mod": ["Audio"], "task": "General", "base": "Diffusion", "desc": "Real-Time Interactive Head. ARIG.", "link": "https://arxiv.org/abs/2601.00664" }
+{ "id": 92, "name": "Avatar Forcing", "year": 2026, "month": 1, "mod": ["Audio"], "task": "General", "base": "Diffusion", "desc": "Real-Time Interactive Head. ARIG.", "link": "https://arxiv.org/abs/2601.00664" }, 
 { "id": 119, "name": "LiveTalk", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Real-time multimodal interactive video diffusion.", "link": "https://arxiv.org/abs/2512.23576" },
 { "id": 120, "name": "ByteLoom", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Consistent human-object interactions via curriculum learning.", "link": "https://arxiv.org/abs/2512.22854" },
 { "id": 121, "name": "MoFu", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Scale-aware modulation for multi-subject video.", "link": "https://arxiv.org/abs/2512.22310" },
