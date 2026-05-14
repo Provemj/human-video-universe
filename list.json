@@ -41,7 +41,7 @@
 { "id": 39, "name": "VividAnimator", "year": 2025, "month": 10, "mod": ["Audio", "Motion"], "task": "Animation", "base": "Diffusion", "desc": "End-to-end audio and pose-driven half-body animation.", "link": "https://arxiv.org/abs/2510.10269" }
 ],
 "categories": {
-"mod": ["Vision", "Text", "Audio", "Motion", "Multi-modal"],
+"mod": ["Vision", "Text", "Audio", "Motion"],
 "task": ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "Motion Planning", "General"],
 "base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive", "Diffusion"]
 },
