@@ -1,5 +1,12 @@
 {
 "papers": [
+{ "id": 1, "name": "Head Pose from Speech", "year": 2017, "month": 8, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Predicting head pose from speech with a conditional VAE. ISCA 2017.", "link": "https://ueaeprints.uea.ac.uk/id/eprint/64846/1/greenwood_Interspeech.pdf" },
+{ "id": 2, "name": "Everybody Dance Now", "year": 2018, "month": 8, "mod": ["Vision"], "task": "Animation", "base": "GAN", "desc": "Classic pose-guided human motion transfer. ICCV 2019.", "link": "https://arxiv.org/abs/1808.07371" },
+{ "id": 3, "name": "3D Speaking Styles", "year": 2019, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Capture, Learning, and Synthesis of 3D Speaking Styles. CVPR 2019.", "link": "https://arxiv.org/abs/1905.03079" },
+{ "id": 4, "name": "Hierarchical Talking Face", "year": 2019, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Cross-modal talking face generation with dynamic pixel-wise loss. CVPR 2019.", "link": "https://arxiv.org/abs/1905.03820" },
+{ "id": 5, "name": "Face-to-Face Translation", "year": 2020, "month": 3, "mod": ["Text", "Audio"], "task": "General", "base": "Encoder-Decoder", "desc": "Towards Automatic Face-to-Face Translation. ACM MM 2019.", "link": "https://arxiv.org/abs/2003.00418" },
+{ "id": 6, "name": "MakeItTalk", "year": 2020, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Speaker-Aware Talking-Head Animation. TOG 2020.", "link": "https://arxiv.org/abs/2004.12992" },
+{ "id": 7, "name": "Audio-driven Video Portraits", "year": 2020, "month": 9, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Photorealistic Audio-driven Video Portraits. TVCG 2020.", "link": "https://ieeexplore.ieee.org/document/9199560" }
 { "id": 1, "name": "Improving Human Image Animation", "year": 2026, "month": 5, "mod": ["Text"], "task": "Animation", "base": "Diffusion", "desc": "Semantic Representation Alignment. SJTU & Alibaba.", "link": "https://arxiv.org/abs/2605.10523" },
 { "id": 2, "name": "SocialDirector", "year": 2026, "month": 5, "mod": ["Text"], "task": "General", "base": "DiT", "desc": "Training-Free Social Interaction Control. U-Tokyo.", "link": "https://arxiv.org/abs/2605.10079" },
 { "id": 3, "name": "SDTalk", "year": 2026, "month": 5, "mod": ["Audio"], "task": "Talking Head", "base": "GAN", "desc": "Gaussian Talking Head Synthesis. HFUT & USTC.", "link": "https://arxiv.org/abs/2605.09956" },
@@ -10,9 +17,9 @@
 { "id": 8, "name": "SuperFace", "year": 2026, "month": 5, "mod": ["Vision"], "task": "Talking Head", "base": "Diffusion", "desc": "Preference-Aligned Expression Estimation. ZJU & Westlake.", "link": "https://arxiv.org/abs/2605.06179" },
 { "id": 9, "name": "FaithfulFaces", "year": 2026, "month": 5, "mod": ["Text"], "task": "Talking Head", "base": "DiT", "desc": "Facial Identity Preservation. NTU & Tencent.", "link": "https://arxiv.org/abs/2605.04702" },
 { "id": 10, "name": "TripVVT", "year": 2026, "month": 5, "mod": ["Vision"], "task": "Virtual Try-on", "base": "Diffusion", "desc": "Large-Scale Triplet Dataset for Virtual Try-On. NJU & Bytedance.", "link": "https://arxiv.org/abs/2604.27958" },
-{ "id": 11, "name": "Mutual Forcing", "year": 2026, "month": 4, "mod": ["Text"], "task": "General", "base": "Autoregressive", "desc": "Dual-Mode Self-Evolution for Fast AR. NKU & Alibaba.", "link": "https://arxiv.org/abs/2604.25819" },
+{ "id": 11, "name": "Mutual Forcing", "year": 2026, "month": 4, "mod": ["Text"], "task": "General", "base": "Encoder-Decoder", "desc": "Dual-Mode Self-Evolution for Fast AR. NKU & Alibaba.", "link": "https://arxiv.org/abs/2604.25819" },
 { "id": 12, "name": "Hallo-Live", "year": 2026, "month": 4, "mod": ["Text", "Audio"], "task": "Talking Head", "base": "Flow Matching", "desc": "Real-Time Streaming Avatar. Fudan & Baidu.", "link": "https://arxiv.org/abs/2604.23632" },
-{ "id": 13, "name": "Talker-T2AV", "year": 2026, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "Joint Talking Audio-Video Generation. HKUST & ZJU.", "link": "https://arxiv.org/abs/2604.23586" },
+{ "id": 13, "name": "Talker-T2AV", "year": 2026, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Joint Talking Audio-Video Generation. HKUST & ZJU.", "link": "https://arxiv.org/abs/2604.23586" },
 { "id": 14, "name": "EAD-Net", "year": 2026, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Emotion-Aware Talking Head. XJU.", "link": "https://arxiv.org/abs/2604.23325" },
 { "id": 15, "name": "ReImagine", "year": 2026, "month": 4, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Image-First Synthesis for Human Video. CUHKSZ.", "link": "https://arxiv.org/abs/2604.19720" },
 { "id": 16, "name": "MMControl", "year": 2026, "month": 4, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Unified Multi-Modal Control. ZJU.", "link": "https://arxiv.org/abs/2604.19679" },
@@ -35,13 +42,13 @@
 { "id": 33, "name": "HumanOmni-Speaker", "year": 2026, "month": 3, "mod": ["Audio"], "task": "General", "base": "LLM", "desc": "Identifying Who said What and When. Alibaba.", "link": "https://arxiv.org/abs/2603.21664" },
 { "id": 34, "name": "EmoTaG", "year": 2026, "month": 3, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Emotion-Aware GS Synthesis. MSU & Qualcomm.", "link": "https://arxiv.org/abs/2603.21332" },
 { "id": 35, "name": "Identity-Consistent Video", "year": 2026, "month": 3, "mod": ["Text"], "task": "General", "base": "Diffusion", "desc": "Large Facial-Angle Variations. Tsinghua & Baidu.", "link": "https://arxiv.org/abs/2603.21299" },
-{ "id": 36, "name": "EARTalking", "year": 2026, "month": 3, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "GPT-style AR Talking Head. USTC & iFLYTEK.", "link": "https://arxiv.org/abs/2603.20307" },
+{ "id": 36, "name": "EARTalking", "year": 2026, "month": 3, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "GPT-style AR Talking Head. USTC & iFLYTEK.", "link": "https://arxiv.org/abs/2603.20307" },
 { "id": 37, "name": "PerformRecast", "year": 2026, "month": 3, "mod": ["Vision"], "task": "Talking Head", "base": "Diffusion", "desc": "Expression/Head Pose Disentanglement. Orca Digital.", "link": "https://arxiv.org/abs/2603.19731" },
 { "id": 38, "name": "LumosX", "year": 2026, "month": 3, "mod": ["Text"], "task": "General", "base": "Diffusion", "desc": "Personalized Video Attributes. ZJU & Alibaba.", "link": "https://arxiv.org/abs/2603.20192" },
 { "id": 39, "name": "AnyCrowd", "year": 2026, "month": 3, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Multi-Character Animation Binding. MBZUAI.", "link": "https://arxiv.org/abs/2603.15415" },
 { "id": 40, "name": "Face-to-Face Dataset", "year": 2026, "month": 3, "mod": ["Audio"], "task": "General", "base": "Diffusion", "desc": "Multi-Person Interaction Modeling. JHU.", "link": "https://arxiv.org/abs/2603.14794" },
 { "id": 41, "name": "MVHOI", "year": 2026, "month": 3, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Human-Object Interaction Reenactment. ANU & Baidu.", "link": "https://arxiv.org/abs/2603.14686" },
-{ "id": 42, "name": "AvatarForcing", "year": 2026, "month": 3, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "Streaming Talking Avatars. ZJU & Kuaishou.", "link": "https://arxiv.org/abs/2603.14331" },
+{ "id": 42, "name": "AvatarForcing", "year": 2026, "month": 3, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Streaming Talking Avatars. ZJU & Kuaishou.", "link": "https://arxiv.org/abs/2603.14331" },
 { "id": 43, "name": "Garments2Look", "year": 2026, "month": 3, "mod": ["Vision"], "task": "Virtual Try-on", "base": "Diffusion", "desc": "Multi-Reference Try-On Dataset. PolyU.", "link": "https://arxiv.org/abs/2603.14153" },
 { "id": 44, "name": "ID-LoRA", "year": 2026, "month": 3, "mod": ["Text"], "task": "General", "base": "Diffusion", "desc": "Identity-Driven Audio-Video Personalization. TAU.", "link": "https://arxiv.org/abs/2603.10256" },
 { "id": 45, "name": "SoulX-LiveAct", "year": 2026, "month": 3, "mod": ["Audio"], "task": "General", "base": "Diffusion", "desc": "Real-Time Human Animation. Soul AI.", "link": "https://arxiv.org/abs/2603.11746" },
@@ -96,7 +103,7 @@
 { "id": 120, "name": "ByteLoom", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Consistent human-object interactions via curriculum learning.", "link": "https://arxiv.org/abs/2512.22854" },
 { "id": 121, "name": "MoFu", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Scale-aware modulation for multi-subject video.", "link": "https://arxiv.org/abs/2512.22310" },
 { "id": 122, "name": "StreamAvatar", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Streaming diffusion for real-time interactive avatars.", "link": "https://arxiv.org/abs/2512.22065" },
-{ "id": 123, "name": "Knot Forcing", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "Real-time infinite interactive portrait animation.", "link": "https://arxiv.org/abs/2512.21734" },
+{ "id": 123, "name": "Knot Forcing", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "Real-time infinite interactive portrait animation.", "link": "https://arxiv.org/abs/2512.21734" },
 { "id": 124, "name": "SyncAnyone", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Implicit disentanglement for lip-syncing in the wild.", "link": "https://arxiv.org/abs/2512.21736" },
 { "id": 125, "name": "TAVID", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Text-driven audio-visual interactive dialogue.", "link": "https://arxiv.org/abs/2512.20296" },
 { "id": 126, "name": "ActAvatar", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Temporally-aware precise action control.", "link": "https://arxiv.org/abs/2512.19546" },
@@ -106,8 +113,8 @@
 { "id": 130, "name": "DeX-Portrait", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Talking Head", "base": "Diffusion", "desc": "Disentangled and expressive portrait animation.", "link": "https://arxiv.org/abs/2512.15524" },
 { "id": 131, "name": "TalkVerse", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Democratizing minute-long audio-driven video.", "link": "https://arxiv.org/abs/2512.14938" },
 { "id": 132, "name": "Soul", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "High-fidelity long-term multimodal animation.", "link": "https://arxiv.org/abs/2512.13495" },
-{ "id": 133, "name": "STARCaster", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Autoregressive", "desc": "View-aware talking portraits via video diffusion.", "link": "https://arxiv.org/abs/2512.13247" },
-{ "id": 134, "name": "UniMo", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "Autoregressive", "desc": "Unifying 2D video and 3D human motion.", "link": "https://arxiv.org/abs/2512.03918" },
+{ "id": 133, "name": "STARCaster", "year": 2025, "month": 12, "mod": ["Audio"], "task": "Talking Head", "base": "Encoder-Decoder", "desc": "View-aware talking portraits via video diffusion.", "link": "https://arxiv.org/abs/2512.13247" },
+{ "id": 134, "name": "UniMo", "year": 2025, "month": 12, "mod": ["Vision"], "task": "Animation", "base": "Encoder-Decoder", "desc": "Unifying 2D video and 3D human motion.", "link": "https://arxiv.org/abs/2512.03918" },
 { "id": 135, "name": "IMTalker", "year": 2025, "month": 11, "mod": ["Audio"], "task": "Talking Head", "base": "Diffusion", "desc": "Efficient talking face via implicit motion transfer.", "link": "https://arxiv.org/abs/2511.22167" },
 { "id": 136, "name": "SteadyDancer", "year": 2025, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "Diffusion", "desc": "Harmonized animation with first-frame preservation.", "link": "https://arxiv.org/abs/2511.19320" },
 { "id": 137, "name": "ID-Composer", "year": 2025, "month": 11, "mod": ["Vision"], "task": "Animation", "base": "UNet", "desc": "Multi-subject synthesis with identity preservation.", "link": "https://arxiv.org/abs/2511.00511" },
@@ -117,6 +124,6 @@
 "categories": {
 "mod": ["Vision", "Text", "Audio", "Motion"],
 "task": ["Animation", "Talking Head", "Virtual Try-on", "3D Generation", "Interactive Edit", "Motion Planning", "General"],
-"base": ["UNet", "DiT", "GAN", "Flow Matching", "Autoregressive", "Diffusion", "LLM"]
+"base": ["UNet", "DiT", "GAN", "Flow Matching", "Encoder-Decoder", "Diffusion", "LLM"]
 }
 }
